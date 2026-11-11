@@ -1278,3 +1278,410 @@ td select {
     flex-wrap: wrap;
   }
 }
+
+.party-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  border-radius: 5px;
+  padding: 4px 7px;
+  white-space: nowrap;
+}
+.party-tag.client {
+  background: #e7f3e5;
+  color: #327540;
+}
+.party-tag.supplier {
+  background: #eaeefb;
+  color: #4d61a2;
+}
+.buyer-cell {
+  min-width: 160px;
+  white-space: normal;
+}
+.buyer-name {
+  display: block;
+  margin: 4px 0;
+  font-size: 11px;
+}
+.shipment-parties {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 22px;
+}
+.shipment-parties > div {
+  padding: 16px;
+  background: #f7f9f4;
+  border: 1px solid #e3e9dd;
+  border-radius: 8px;
+}
+.shipment-parties h3 {
+  margin: 10px 0 4px;
+}
+.shipment-parties p {
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 8px;
+  color: #65765e;
+}
+.sale-edit-list {
+  display: grid;
+  gap: 14px;
+}
+.sale-edit {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13px;
+  border: 1px solid #dfe7d9;
+  border-radius: 8px;
+  padding: 16px;
+}
+.sale-edit legend {
+  font-size: 11px;
+  color: #788a6b;
+  padding: 0 7px;
+}
+.sale-edit label,
+.expense-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11px;
+  color: #63765b;
+}
+.sale-subtotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 10px;
+  padding-bottom: 8px;
+}
+.sale-subtotal strong {
+  font-size: 17px;
+}
+.sale-subtotal button {
+  color: #b35555;
+  padding: 5px;
+}
+.expense-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+.currency-input {
+  position: relative;
+}
+.currency-input span {
+  position: absolute;
+  left: 11px;
+  top: 9px;
+  color: #92a18b;
+}
+.currency-input input {
+  padding-left: 25px;
+  width: 100%;
+}
+.shipment-totals,
+.history-totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 18px;
+  background: #f3f7ee;
+  border-radius: 8px;
+  margin: 18px 0;
+}
+.shipment-totals strong,
+.history-totals strong {
+  display: block;
+  font-size: 21px;
+  margin-top: 7px;
+  letter-spacing: -0.5px;
+}
+.editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+.campaign-intro {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  color: #7b897f;
+  font-size: 12px;
+}
+.campaign-calendar {
+  font-size: 12px;
+  margin-top: 16px;
+  color: #385b39;
+  line-height: 1.8;
+}
+.campaign-recipients {
+  font-size: 11px;
+  color: #89967f;
+  margin-top: 9px;
+  line-height: 1.6;
+}
+.campaign-grid blockquote {
+  min-height: 90px;
+}
+.campaign-step {
+  padding: 23px 0;
+  border-top: 1px solid #e6ebdf;
+}
+.campaign-step h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.campaign-step h2 b {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #e8f2df;
+  color: #4d8845;
+  font-size: 12px;
+}
+.audience-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.audience-buttons button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid #dce4d5;
+  border-radius: 7px;
+  padding: 13px 24px;
+  font-size: 13px;
+  color: #8b9880;
+  flex: 1;
+}
+.audience-buttons .active {
+  background: #eef6e8;
+  border-color: #75ad65;
+  color: #3c753b;
+}
+.campaign-select-list {
+  max-height: 240px;
+  padding: 10px;
+  border: 1px solid #e5eadd;
+  border-radius: 7px;
+  background: #fafcf7;
+}
+.campaign-select-list label {
+  padding: 6px;
+  align-items: center;
+}
+.campaign-select-list input {
+  accent-color: #3fa34d;
+}
+.week-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 14px 0;
+}
+.week-buttons button {
+  font-size: 11px;
+  border: 1px solid #dfe7d5;
+  background: #f7faf2;
+  color: #7c8c6d;
+  border-radius: 6px;
+  padding: 9px 12px;
+}
+.week-buttons button.active {
+  background: #3fa34d;
+  color: white;
+  border-color: #3fa34d;
+}
+.contact-days summary,
+.monthly-history summary {
+  font-size: 12px;
+  color: #438444;
+  cursor: pointer;
+  padding: 12px 0;
+}
+.contact-days > div {
+  padding: 15px 0;
+  border-top: 1px solid #e6ebdf;
+}
+.contact-days strong {
+  font-size: 12px;
+}
+.contact-days .text-link {
+  font-size: 10px;
+}
+.message-preview {
+  background: #edf6e5;
+  padding: 18px;
+  border-radius: 0 10px 10px 10px;
+  margin-top: 18px;
+  white-space: pre-wrap;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.message-preview small {
+  margin-bottom: 8px;
+}
+.campaign-save-summary {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: #f7f9f3;
+  border-radius: 7px;
+  padding: 15px;
+  font-size: 12px;
+  color: #6f805e;
+}
+.schedule-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.schedule-summary span {
+  margin-left: auto;
+  color: #438444;
+  font-size: 11px;
+}
+.monthly-history {
+  margin: 12px 0 22px;
+}
+.chat-contact .party-tag {
+  display: table;
+  font-size: 8px;
+  padding: 2px 5px;
+  margin-top: 4px;
+}
+.chat-contact.supplier-chat .avatar,
+.supplier-conversation .avatar {
+  background: #e8edfa;
+  color: #5a6fa7;
+}
+.chat-contact.supplier-chat.active {
+  background: #eff2fb;
+  border-left-color: #7586b6;
+}
+.supplier-conversation > header {
+  border-bottom: 3px solid #b9c5e5;
+}
+.client-conversation > header {
+  border-bottom: 3px solid #a4c99c;
+}
+.conversation header .party-tag {
+  margin-top: 5px;
+  font-size: 8px;
+}
+.supplier-conversation .bubble.outgoing {
+  background: #e9eefb;
+}
+.supplier-conversation .bubbles {
+  background-color: #f4f5f9;
+}
+.contact-role {
+  text-align: center;
+  margin: 12px 0;
+}
+.day-pills[hidden] {
+  display: none;
+}
+@media (max-width: 720px) {
+  .shipment-parties {
+    grid-template-columns: 1fr;
+  }
+  .sale-edit {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 12px;
+  }
+  .expense-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .shipment-totals,
+  .history-totals {
+    gap: 8px;
+    padding: 12px;
+  }
+  .shipment-totals strong,
+  .history-totals strong {
+    font-size: 16px;
+  }
+  .history-totals small {
+    font-size: 9px;
+  }
+  .campaign-step h2 {
+    font-size: 14px;
+  }
+  .week-buttons {
+    gap: 4px;
+  }
+  .week-buttons button {
+    padding: 8px 9px;
+    font-size: 10px;
+  }
+  .audience-buttons button {
+    padding: 12px 15px;
+  }
+  .campaign-step .toolbar input {
+    width: 100%;
+  }
+  .campaign-intro {
+    align-items: flex-start;
+  }
+  .schedule-summary {
+    flex-wrap: wrap;
+  }
+  .schedule-summary span {
+    margin-left: 30px;
+  }
+  .sale-subtotal strong {
+    font-size: 15px;
+  }
+}
+.conversation header .party-tag {
+  display: table;
+}
+.modal > header {
+  position: sticky;
+  top: -26px;
+  background: white;
+  z-index: 2;
+  padding: 12px 0;
+  margin-top: -12px;
+}
+.contact-panel:has(.party-tag.supplier) > .avatar {
+  background: #e8edfa;
+  color: #5a6fa7;
+}
+@media (max-width: 720px) {
+  .modal > header {
+    top: -20px;
+  }
+}
+.sale-edit {
+  min-width: 0;
+}
+.sale-edit label {
+  min-width: 0;
+}
+.sale-edit input,
+.sale-edit select {
+  width: 100%;
+}
+.sale-subtotal {
+  min-width: 0;
+}

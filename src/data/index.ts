@@ -82,6 +82,9 @@ export type Shipment = {
   unloading: number;
   scale: number;
   handling: number;
+  scale2?: number;
+  scale3?: number;
+  purchaseTotal?: number;
 };
 export const shipments: Shipment[] = Array.from({ length: 66 }, (_, i) => {
   const month = Math.floor(i / 6) + 1,
@@ -115,8 +118,16 @@ export const sales: Sale[] = shipments.flatMap((s, i) =>
   })),
 );
 export const saleTotal = (s: Sale) => Math.round(s.kg * s.price * 100) / 100;
+export const purchaseCost = (s: Shipment) =>
+  s.purchaseTotal ?? s.kg * s.purchase;
 export const cost = (s: Shipment) =>
-  s.kg * s.purchase + s.freight + s.unloading + s.scale + s.handling;
+  purchaseCost(s) +
+  s.freight +
+  s.unloading +
+  s.scale +
+  (s.scale2 ?? 0) +
+  (s.scale3 ?? 0) +
+  s.handling;
 export const clientName = (id: string) =>
   clients.find((c) => c.id === id)?.name ?? "Diversos";
 export const shipmentName = (id: string) =>
@@ -159,25 +170,56 @@ export type Movement = {
   method: string;
   note: string;
 };
+// Six months of illustrative invoices and payments; closing balances remain unchanged.
 export const seedMovements: Movement[] = [...clients, ...suppliers].flatMap(
-  (c) => [
-    {
-      id: c.id + "-0",
-      contact: c.id,
-      date: "2026-10-01",
-      charge: Math.round(c.balance * 1.3),
-      payment: 0,
-      method: "Crédito",
-      note: "Saldo inicial de demostración",
-    },
-    {
-      id: c.id + "-1",
-      contact: c.id,
-      date: "2026-11-04",
-      charge: 0,
-      payment: Math.round(c.balance * 1.3) - c.balance,
-      method: "Transferencia",
-      note: "Abono de demostración",
-    },
-  ],
+  (c, index) =>
+    Array.from({ length: 12 }, (_, i) => {
+      const month = String(6 + Math.floor(i / 2)).padStart(2, "0");
+      const day = i % 2 ? "06" : "02";
+      const payment = 8000 + ((index + i) % 5) * 2500;
+      const principal =
+        i === 11
+          ? c.balance - Math.floor(c.balance / 12) * 11
+          : Math.floor(c.balance / 12);
+      return [
+        {
+          id: `${c.id}-hist-${i}-charge`,
+          contact: c.id,
+          date: `2026-${month}-${day}`,
+          charge: principal + payment,
+          payment: 0,
+          method: "Crédito",
+          note: `${c.id.startsWith("p") ? "Compra" : "Venta"} de cebolla ${i % 2 ? "morada" : "blanca"} · Remisión DEMO-${1100 + index * 12 + i}`,
+        },
+        {
+          id: `${c.id}-hist-${i}-payment`,
+          contact: c.id,
+          date: `2026-${month}-${i % 2 ? "09" : "04"}`,
+          charge: 0,
+          payment,
+          method: i % 3 ? "Transferencia" : "Efectivo",
+          note: `Abono a remisión DEMO-${1100 + index * 12 + i}`,
+        },
+      ];
+    }).flat(),
 );
+export function expandLegacyHistory(movements: Movement[]): Movement[] {
+  const legacy = new Set(
+    [...clients, ...suppliers]
+      .filter(
+        (c) =>
+          movements.some((m) => m.id === c.id + "-0") &&
+          movements.some((m) => m.id === c.id + "-1"),
+      )
+      .map((c) => c.id),
+  );
+  if (!legacy.size) return movements;
+  return [
+    ...movements.filter(
+      (m) =>
+        !legacy.has(m.contact) ||
+        (m.id !== m.contact + "-0" && m.id !== m.contact + "-1"),
+    ),
+    ...seedMovements.filter((m) => legacy.has(m.contact)),
+  ];
+}

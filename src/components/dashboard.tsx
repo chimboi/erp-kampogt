@@ -4,19 +4,12 @@ import { Card, Kpi, Badge, Table, Empty } from "./ui";
 import { PeriodPicker, usePeriod, within } from "./period-picker";
 import { Trend } from "./charts";
 import { useStore } from "@/lib/store";
-import {
-  shipments,
-  cost,
-  saleTotal,
-  money,
-  number,
-  date,
-  statuses,
-} from "@/data";
+import { cost, saleTotal, money, number, date, statuses } from "@/data";
 export default function Dashboard() {
   const p = usePeriod("Día"),
     store = useStore(),
     [unit, setUnit] = useState("$");
+  const shipments = store.shipments;
   const s = store.sales.filter((s) => within(s.date, p.period)),
     o = store.orders.filter((o) => within(o.date, p.period));
   const revenue = s.reduce((a, s) => a + saleTotal(s), 0),

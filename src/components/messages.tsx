@@ -15,7 +15,6 @@ import {
   suppliers,
   money,
   date,
-  shipments,
   shipmentName,
   type Contact,
 } from "@/data";
@@ -25,14 +24,37 @@ import { orderSchema, type DetectedOrder } from "@/lib/agent/schema";
 import { Badge, Modal } from "./ui";
 const contacts = [...clients.slice(0, 10), ...suppliers.slice(0, 4)];
 const stages = ["Cotizando", "Pedido en curso", "Esperando pago", "Cerrado"];
+const isSupplier = (c: Contact) => c.id.startsWith("p");
+const roleLabel = (c: Contact) => (isSupplier(c) ? "Proveedor" : "Cliente");
+function PartyBadge({ contact }: { contact: Contact }) {
+  return (
+    <span
+      className={"party-tag " + (isSupplier(contact) ? "supplier" : "client")}
+    >
+      {roleLabel(contact)} · {isSupplier(contact) ? "Compras" : "Ventas"}
+    </span>
+  );
+}
 const previews = [
   "Buen día, ¿a cómo traes la morada?",
   "¿Me apartas 20 bultos de blanca?",
   "Ya quedó la transferencia, Jorge.",
   "Gracias, recibimos todo completo.",
   "¿Sale mañana el flete para Tepic?",
-  "Tengo blanca a $2.90 en Salamanca.",
+  "¿Qué precio tiene la blanca por bulto?",
 ];
+const supplierPreviews = [
+  "Tengo blanca a $2.90 en Salamanca. ¿Cuántos kilos necesitas?",
+  "La morada está lista para cargar el jueves.",
+  "Te comparto el precio de compra de esta semana.",
+  "El camión salió. Te envío la remisión de compra.",
+];
+const preview = (c: Contact) =>
+  isSupplier(c)
+    ? supplierPreviews[
+        suppliers.findIndex((p) => p.id === c.id) % supplierPreviews.length
+      ]
+    : previews[clients.findIndex((p) => p.id === c.id) % previews.length];
 const seed = (c: Contact): UIMessage[] => [
   {
     id: c.id + "a",
@@ -40,7 +62,7 @@ const seed = (c: Contact): UIMessage[] => [
     parts: [
       {
         type: "text",
-        text: `Buen día, soy ${c.name}. ${previews[contacts.indexOf(c) % previews.length]}`,
+        text: `Buen día, soy ${c.name}. ${preview(c)}`,
       },
     ],
   },
@@ -50,7 +72,9 @@ const seed = (c: Contact): UIMessage[] => [
     parts: [
       {
         type: "text",
-        text: "¡Buen día! Claro, déjame revisar disponibilidad y te confirmo.",
+        text: isSupplier(c)
+          ? "Gracias. ¿Qué tamaños tienes disponibles y cuánto sale el flete a Guadalajara?"
+          : "¡Buen día! Claro, déjame revisar disponibilidad y te confirmo.",
       },
     ],
   },
@@ -124,7 +148,16 @@ export default function Messages() {
                 <button
                   key={k}
                   className={k === kind ? "active" : ""}
-                  onClick={() => setKind(k)}
+                  onClick={() => {
+                    setKind(k);
+                    setStage("Todos");
+                    const first = contacts.find(
+                      (c) =>
+                        k === "Todos" ||
+                        (k === "Proveedores" ? isSupplier(c) : !isSupplier(c)),
+                    );
+                    if (first) setSelected(first.id);
+                  }}
                 >
                   {k}
                 </button>
@@ -143,7 +176,11 @@ export default function Messages() {
           {filtered.map((c) => (
             <button
               key={c.id}
-              className={"chat-contact " + (selected === c.id ? "active" : "")}
+              className={
+                "chat-contact " +
+                (isSupplier(c) ? "supplier-chat " : "client-chat ") +
+                (selected === c.id ? "active" : "")
+              }
               onClick={() => {
                 setSelected(c.id);
                 setMobile(true);
@@ -158,7 +195,8 @@ export default function Messages() {
               </span>
               <div>
                 <strong>{c.name}</strong>
-                <p>{previews[contacts.indexOf(c) % previews.length]}</p>
+                <PartyBadge contact={c} />
+                <p>{preview(c)}</p>
                 <small>
                   {agents[c.id]
                     ? "✦ Agente IA"
@@ -277,7 +315,12 @@ function Conversation({
     setCreated((c) => [...c, id]);
   }
   return (
-    <section className="conversation">
+    <section
+      className={
+        "conversation " +
+        (isSupplier(contact) ? "supplier-conversation" : "client-conversation")
+      }
+    >
       <header>
         <button
           className="back-chat"
@@ -289,7 +332,7 @@ function Conversation({
         <span className="avatar">{contact.name.slice(0, 2).toUpperCase()}</span>
         <div>
           <strong>{contact.name}</strong>
-          <small>{contact.city}</small>
+          <PartyBadge contact={contact} />
         </div>
         <button
           className={"agent-toggle " + (enabled ? "on" : "")}
@@ -312,6 +355,7 @@ function Conversation({
             {m.parts.map((part, i) => {
               if (part.type === "text") return <p key={i}>{part.text}</p>;
               if (
+                !isSupplier(contact) &&
                 part.type === "tool-registrarPedido" &&
                 "state" in part &&
                 part.state === "output-available" &&
@@ -354,7 +398,7 @@ function Conversation({
                 ? m.id.startsWith("manual-") || m.id === contact.id + "b"
                   ? "Kampo GT · "
                   : "Agente IA · "
-                : "Cliente · "}
+                : roleLabel(contact) + " · "}
               10:42 {m.role === "assistant" && <CheckCheck size={13} />}
             </small>
           </div>
@@ -387,7 +431,12 @@ function Conversation({
               { text },
               {
                 body: {
-                  system: system + `\nContacto actual: ${contact.name}.`,
+                  system:
+                    system +
+                    `\nContacto actual: ${contact.name}. Rol: ${roleLabel(contact)}. ` +
+                    (isSupplier(contact)
+                      ? "Actúa como comprador de Kampo GT. Recaba cotización, origen, tamaños, kilos, precio y flete. No uses registrarPedido: es exclusiva para ventas a clientes."
+                      : "Actúa como vendedor de Kampo GT."),
                 },
               },
             );
@@ -411,7 +460,7 @@ function Conversation({
           onChange={(e) => setInput(e.target.value)}
           placeholder={
             enabled
-              ? "Escribe como cliente para probar el agente…"
+              ? `Escribe como ${roleLabel(contact).toLowerCase()} para probar el agente…`
               : "Escribe un mensaje de demostración…"
           }
         />
@@ -425,7 +474,7 @@ function Conversation({
       </form>
       <p className="composer-note">
         {enabled
-          ? "Simulación como cliente · Respuestas del agente IA"
+          ? `Simulación como ${roleLabel(contact).toLowerCase()} · Respuestas del agente IA`
           : "Simulación local · No se envía a WhatsApp"}
       </p>
     </section>
@@ -436,11 +485,19 @@ function ContactPanel({ contact }: { contact: Contact }) {
   const balance = store.movements
     .filter((m) => m.contact === contact.id)
     .reduce((a, m) => a + m.charge - m.payment, 0);
-  const recent = Array.from(
-    new Set(
-      store.sales.filter((s) => s.client === contact.id).map((s) => s.shipment),
-    ),
-  ).slice(-3);
+  const shipments = store.shipments;
+  const recent = isSupplier(contact)
+    ? shipments
+        .filter((s) => s.supplier === contact.id)
+        .slice(-3)
+        .map((s) => s.id)
+    : Array.from(
+        new Set(
+          store.sales
+            .filter((s) => s.client === contact.id)
+            .map((s) => s.shipment),
+        ),
+      ).slice(-3);
   return (
     <aside className="contact-panel">
       <div className="avatar large">
@@ -451,20 +508,30 @@ function ContactPanel({ contact }: { contact: Contact }) {
           .join("")}
       </div>
       <h3>{contact.name}</h3>
+      <div className="contact-role">
+        <PartyBadge contact={contact} />
+      </div>
       <p className="muted">{contact.city}</p>
       <p className="muted text-xs">
         {contact.phone || "Sin teléfono registrado"}
       </p>
       <hr />
-      <p className="label-caps">Días de carga</p>
-      <div className="day-pills">
+      <p className="label-caps">
+        {isSupplier(contact) ? "Origen de la compra" : "Días de carga"}
+      </p>
+      {isSupplier(contact) && <p className="text-sm mt-3">{contact.city}</p>}
+      <div className="day-pills" hidden={isSupplier(contact)}>
         {["L", "M", "M", "J", "V", "S", "D"].map((d, i) => (
           <span key={i} className={contact.days.includes(i) ? "active" : ""}>
             {d}
           </span>
         ))}
       </div>
-      <p className="label-caps mt-6">Saldo pendiente</p>
+      <p className="label-caps mt-6">
+        {isSupplier(contact)
+          ? "Saldo por pagar al proveedor"
+          : "Saldo por cobrar al cliente"}
+      </p>
       <strong className="text-2xl">{money(balance)}</strong>
       <hr />
       <p className="label-caps">Últimos embarques</p>

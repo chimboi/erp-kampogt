@@ -22,8 +22,8 @@ npm run build
 
 - Inicio: periodo, indicadores, gráfica por producto y pedidos con estatus editable.
 - CRM / Mensajes: 14 conversaciones, filtros, ficha de contacto, mensajes locales y agente con streaming. Con el agente activo, se escribe como cliente. La herramienta propone un pedido; **Crear pedido** lo añade a Inicio, con protección contra duplicados.
-- CRM / Campañas: proveedores, recordatorios por día de carga y cobranza; horarios, destinatarios, plantillas, días y umbral editables. Simulación manual de envíos. No hay conexión a WhatsApp ni tareas programadas reales.
-- ERP: rentabilidad y detalle de embarques, caja con filtros/exportación CSV/registro de venta, estados de cuenta con cargos y abonos.
+- CRM / Campañas: creación y edición por destinatarios, calendario y mensaje; selección de clientes o proveedores, búsqueda, selección múltiple, días generales y excepciones por contacto. Recordatorios por día de carga y cobranza con umbral editable. Simulación manual de envíos. No hay conexión a WhatsApp ni tareas programadas reales.
+- ERP: proveedores y clientes separados por embarque; edición de ventas y siete gastos (compra, flete, descarga, tres básculas y maniobra), con actualización de Caja, Inicio y KPIs; caja con filtros/exportación CSV/registro de venta, estados de cuenta con seis meses de cargos y abonos y resumen mensual.
 - KPIs: ingresos por producto, cliente o plaza; resultados; ranking y matriz de embarques por cliente.
 
 ## Datos y persistencia
@@ -32,7 +32,7 @@ La fecha de referencia del demo es **10 de noviembre de 2026**. Los 66 embarques
 
 Nombres y días de carga proceden de `context/3. DATOS CLIENTES IA.xlsx`, hoja `Dia de carga`; el archivo JSON extraído contiene únicamente nombres, contactos y días. Los importes, ciudades asignadas, ventas y embarques son ejemplos, no una migración contable. El saldo inicial de Abel Aguayo sigue la referencia del plan. Los libros originales están excluidos de Git.
 
-Pedidos, ventas, movimientos, campañas y conversaciones se guardan en `localStorage` de este navegador. No hay base de datos ni sincronización entre dispositivos. Borrar los datos del sitio restaura el demo. La sesión es un acceso de demostración, no un sistema de autenticación para operación real.
+Pedidos, embarques, ventas, movimientos, campañas y conversaciones se guardan en `localStorage` de este navegador. No hay base de datos ni sincronización entre dispositivos. Borrar los datos del sitio restaura el demo. La sesión es un acceso de demostración, no un sistema de autenticación para operación real.
 
 ## Agente y Vercel
 

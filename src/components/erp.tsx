@@ -7,8 +7,6 @@ import { useStore } from "@/lib/store";
 import {
   clients,
   suppliers,
-  shipments,
-  cost,
   saleTotal,
   money,
   number,
@@ -16,179 +14,9 @@ import {
   clientName,
   shipmentName,
   TODAY,
-  type Shipment,
   type Contact,
 } from "@/data";
-export function Shipments() {
-  const p = usePeriod(),
-    store = useStore(),
-    [selected, setSelected] = useState<Shipment | null>(null),
-    [q, setQ] = useState("");
-  const rows = shipments.filter(
-    (s) =>
-      (within(s.date, p.period) ||
-        store.sales.some(
-          (v) => v.shipment === s.id && within(v.date, p.period),
-        )) &&
-      s.name.toLowerCase().includes(q.toLowerCase()),
-  );
-  const total = (id: string) =>
-      store.sales
-        .filter((v) => v.shipment === id && within(v.date, p.period))
-        .reduce((a, v) => a + saleTotal(v), 0),
-    revenue = rows.reduce((a, s) => a + total(s.id), 0),
-    profit = revenue - rows.reduce((a, s) => a + cost(s), 0);
-  return (
-    <>
-      <div className="page-title">
-        <h1>Rentabilidad embarques</h1>
-      </div>
-      <PeriodPicker state={p} />
-      <div className="kpis">
-        <Kpi label="Embarques" value={number(rows.length)} />
-        <Kpi
-          label="Kilos comprados"
-          value={number(rows.reduce((a, s) => a + s.kg, 0))}
-        />
-        <Kpi label="Venta total" value={money(revenue)} />
-        <Kpi
-          label="Utilidad"
-          value={money(profit)}
-          detail={`${revenue ? ((profit / revenue) * 100).toFixed(1) : 0}% margen`}
-        />
-      </div>
-      <Card>
-        <div className="section-heading">
-          <h2>Liquidaciones</h2>
-          <input
-            placeholder="Buscar embarque…"
-            aria-label="Buscar embarque"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </div>
-        <Table
-          heads={[
-            "Embarque",
-            "Proveedor / origen",
-            "Producto",
-            "Fecha",
-            "Kg comprados",
-            "Kg vendidos",
-            "Efectivo",
-            "Crédito",
-            "Venta total",
-            "Gastos",
-            "Resultado",
-          ]}
-        >
-          {rows.map((s) => {
-            const vs = store.sales.filter(
-              (v) => v.shipment === s.id && within(v.date, p.period),
-            );
-            return (
-              <tr key={s.id}>
-                <td>
-                  <button className="text-link" onClick={() => setSelected(s)}>
-                    {s.name}
-                  </button>
-                </td>
-                <td>
-                  {suppliers.find((p) => p.id === s.supplier)?.name}
-                  <small>{s.origin}</small>
-                </td>
-                <td>
-                  <Badge>{s.product}</Badge>
-                </td>
-                <td>{date(s.date)}</td>
-                <td>{number(s.kg)}</td>
-                <td>{number(vs.reduce((a, v) => a + v.kg, 0))}</td>
-                <td>
-                  {money(
-                    vs
-                      .filter((v) => v.cash)
-                      .reduce((a, v) => a + saleTotal(v), 0),
-                  )}
-                </td>
-                <td>
-                  {money(
-                    vs
-                      .filter((v) => !v.cash)
-                      .reduce((a, v) => a + saleTotal(v), 0),
-                  )}
-                </td>
-                <td>{money(total(s.id))}</td>
-                <td>{money(cost(s))}</td>
-                <td
-                  className={
-                    total(s.id) - cost(s) >= 0 ? "positive" : "negative"
-                  }
-                >
-                  {money(total(s.id) - cost(s))}
-                </td>
-              </tr>
-            );
-          })}
-        </Table>
-        {!rows.length && <Empty />}
-      </Card>
-      {selected && (
-        <Modal
-          title={"Embarque " + selected.name}
-          onClose={() => setSelected(null)}
-        >
-          <div className="detail-summary">
-            <Badge>{selected.product}</Badge>
-            <span>
-              Remisión {selected.id.toUpperCase()} · {selected.origin} ·{" "}
-              {date(selected.date)}
-            </span>
-          </div>
-          <Table heads={["Tamaño", "Bultos (25 kg)", "Kilos", "Precio compra"]}>
-            {["GDE", "MED", "PP", "CH"].map((t) => (
-              <tr key={t}>
-                <td>{t}</td>
-                <td>{selected.kg / 100}</td>
-                <td>{number(selected.kg / 4)}</td>
-                <td>{money(selected.purchase)}</td>
-              </tr>
-            ))}
-          </Table>
-          <h3>Ventas</h3>
-          <Table heads={["Cliente", "Kilos", "Importe", "Pago"]}>
-            {store.sales
-              .filter((v) => v.shipment === selected.id)
-              .map((v) => (
-                <tr key={v.id}>
-                  <td>{clientName(v.client)}</td>
-                  <td>{number(v.kg)}</td>
-                  <td>{money(saleTotal(v))}</td>
-                  <td>{v.cash ? "Efectivo" : "Crédito"}</td>
-                </tr>
-              ))}
-          </Table>
-          <h3>Gastos</h3>
-          {Object.entries({
-            Compra: selected.kg * selected.purchase,
-            Flete: selected.freight,
-            Descarga: selected.unloading,
-            Báscula: selected.scale,
-            Maniobra: selected.handling,
-          }).map(([k, v]) => (
-            <div key={k} className="ledger-line">
-              <span>{k}</span>
-              <strong>{money(v)}</strong>
-            </div>
-          ))}
-          <div className="total-line">
-            <span>Resultado</span>
-            <strong>{money(total(selected.id) - cost(selected))}</strong>
-          </div>
-        </Modal>
-      )}
-    </>
-  );
-}
+export { default as Shipments } from "./shipments";
 export function Cash() {
   const p = usePeriod(),
     store = useStore(),
@@ -198,6 +26,7 @@ export function Cash() {
     [payment, setPayment] = useState(""),
     [add, setAdd] = useState(false),
     [error, setError] = useState("");
+  const shipments = store.shipments;
   const rows = store.sales.filter(
     (v) =>
       within(v.date, p.period) &&
@@ -505,7 +334,7 @@ export function Balances({ supplier = false }: { supplier?: boolean }) {
           heads={[
             supplier ? "Proveedor" : "Cliente",
             "Plaza",
-            "Movimientos",
+            "Historial",
             "Saldo",
             "",
           ]}
@@ -515,7 +344,8 @@ export function Balances({ supplier = false }: { supplier?: boolean }) {
               <td className="font-semibold">{c.name}</td>
               <td>{c.city}</td>
               <td>
-                {store.movements.filter((m) => m.contact === c.id).length}
+                {store.movements.filter((m) => m.contact === c.id).length}{" "}
+                movimientos<small>Junio – noviembre 2026</small>
               </td>
               <td className="font-semibold">{money(balance(c.id))}</td>
               <td>
@@ -540,6 +370,65 @@ export function Balances({ supplier = false }: { supplier?: boolean }) {
             <span>Saldo actual</span>
             <strong>{money(balance(selected.id))}</strong>
           </div>
+          <p className="muted text-sm my-3">
+            Historial de demostración · Junio a noviembre de 2026
+          </p>
+          <div className="history-totals">
+            <div>
+              <small>{supplier ? "Compras y cargos" : "Ventas y cargos"}</small>
+              <strong>{money(ledger.reduce((a, m) => a + m.charge, 0))}</strong>
+            </div>
+            <div>
+              <small>
+                {supplier ? "Pagos realizados" : "Abonos recibidos"}
+              </small>
+              <strong className="positive">
+                {money(ledger.reduce((a, m) => a + m.payment, 0))}
+              </strong>
+            </div>
+            <div>
+              <small>Movimientos</small>
+              <strong>{ledger.length}</strong>
+            </div>
+          </div>
+          <details className="monthly-history">
+            <summary>Ver resumen por mes</summary>
+            <Table heads={["Mes", "Cargos", "Abonos", "Saldo al cierre"]}>
+              {Array.from(new Set(ledger.map((m) => m.date.slice(0, 7))))
+                .sort()
+                .map((month) => (
+                  <tr key={month}>
+                    <td>
+                      {new Date(month + "-15T12:00:00").toLocaleDateString(
+                        "es-MX",
+                        { month: "long", year: "numeric" },
+                      )}
+                    </td>
+                    <td>
+                      {money(
+                        ledger
+                          .filter((m) => m.date.startsWith(month))
+                          .reduce((a, m) => a + m.charge, 0),
+                      )}
+                    </td>
+                    <td>
+                      {money(
+                        ledger
+                          .filter((m) => m.date.startsWith(month))
+                          .reduce((a, m) => a + m.payment, 0),
+                      )}
+                    </td>
+                    <td>
+                      {money(
+                        ledger
+                          .filter((m) => m.date.slice(0, 7) <= month)
+                          .reduce((a, m) => a + m.charge - m.payment, 0),
+                      )}
+                    </td>
+                  </tr>
+                ))}
+            </Table>
+          </details>
           <div className="toolbar">
             <button className="secondary" onClick={() => setKind("cargo")}>
               + Registrar cargo
@@ -610,9 +499,9 @@ export function Balances({ supplier = false }: { supplier?: boolean }) {
             heads={[
               "Fecha",
               ...(supplier ? ["Entrada / factura"] : []),
-              "Importe",
+              "Cargo / venta",
               "Abonos",
-              "Saldo",
+              "Saldo acumulado",
               "Forma de pago",
               "Observaciones",
             ]}

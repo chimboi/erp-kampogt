@@ -5,12 +5,12 @@ import { PeriodPicker, usePeriod, within } from "./period-picker";
 import { Trend, Donut, Bars } from "./charts";
 import { useStore } from "@/lib/store";
 import {
-  shipments,
   clients,
   clientName,
   shipmentName,
   saleTotal,
   cost,
+  purchaseCost,
   money,
   number,
 } from "@/data";
@@ -22,11 +22,12 @@ export default function Indicators({
   const p = usePeriod("Año"),
     store = useStore(),
     [group, setGroup] = useState("Producto");
+  const shipments = store.shipments;
   const sales = store.sales.filter((s) => within(s.date, p.period)),
     ships = shipments.filter((s) => within(s.date, p.period)),
     revenue = sales.reduce((a, s) => a + saleTotal(s), 0),
-    purchase = ships.reduce((a, s) => a + s.kg * s.purchase, 0),
-    expenses = ships.reduce((a, s) => a + cost(s) - s.kg * s.purchase, 0);
+    purchase = ships.reduce((a, s) => a + purchaseCost(s), 0),
+    expenses = ships.reduce((a, s) => a + cost(s) - purchaseCost(s), 0);
   const groups = Object.entries(
     sales.reduce<Record<string, number>>((a, s) => {
       const key =
@@ -56,10 +57,10 @@ export default function Indicators({
         .reduce((a, s) => a + saleTotal(s), 0),
       Costos: ships
         .filter((s) => s.date.startsWith(month))
-        .reduce((a, s) => a + s.kg * s.purchase, 0),
+        .reduce((a, s) => a + purchaseCost(s), 0),
       Gastos: ships
         .filter((s) => s.date.startsWith(month))
-        .reduce((a, s) => a + cost(s) - s.kg * s.purchase, 0),
+        .reduce((a, s) => a + cost(s) - purchaseCost(s), 0),
     }));
   const ranked = Array.from(new Set(sales.map((s) => s.client)))
     .map((id) => ({

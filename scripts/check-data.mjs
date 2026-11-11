@@ -52,3 +52,54 @@ assert(sales.every((s) => clients.some((c) => c.id === s.client)));
 console.log(
   "PASS: 66 embarques, kilos, saldos, identificadores y cuadre mensual ene–nov.",
 );
+
+const { cost, purchaseCost, expandLegacyHistory } = exports;
+assert.equal(
+  cost({
+    ...shipments[0],
+    purchaseTotal: 100,
+    freight: 20,
+    unloading: 30,
+    scale: 40,
+    scale2: 50,
+    scale3: 60,
+    handling: 70,
+  }),
+  370,
+);
+assert.equal(purchaseCost({ ...shipments[0], purchaseTotal: 0 }), 0);
+const custom = {
+  id: "user-abono",
+  contact: "c0",
+  date: "2026-11-10",
+  charge: 0,
+  payment: 1000,
+  method: "Efectivo",
+  note: "Abono usuario",
+};
+const old = [
+  {
+    id: "c0-0",
+    contact: "c0",
+    charge: Math.round(clients[0].balance * 1.3),
+    payment: 0,
+  },
+  {
+    id: "c0-1",
+    contact: "c0",
+    charge: 0,
+    payment: Math.round(clients[0].balance * 1.3) - clients[0].balance,
+  },
+  custom,
+];
+const migrated = expandLegacyHistory(old);
+assert.equal(migrated.length, 25);
+assert(migrated.includes(custom));
+assert.equal(
+  migrated.reduce((a, m) => a + m.charge - m.payment, 0),
+  clients[0].balance - 1000,
+);
+assert.deepEqual(expandLegacyHistory(migrated), migrated);
+console.log(
+  "PASS: siete gastos, compra cero y migración del historial sin perder abonos.",
+);

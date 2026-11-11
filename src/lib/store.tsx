@@ -10,6 +10,9 @@ import {
 } from "react";
 import {
   orders,
+  shipments,
+  expandLegacyHistory,
+  type Shipment,
   sales,
   seedMovements,
   type Order,
@@ -74,6 +77,8 @@ export function usePersistentState<T>(
   return [value, setValue];
 }
 type Store = {
+  shipments: Shipment[];
+  setShipments: Dispatch<SetStateAction<Shipment[]>>;
   orders: Order[];
   setOrders: Dispatch<SetStateAction<Order[]>>;
   sales: Sale[];
@@ -86,15 +91,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [o, so] = usePersistentState("kampo-orders-v1", orders),
     [s, ss] = usePersistentState("kampo-sales-v1", sales),
     [m, sm] = usePersistentState("kampo-movements-v1", seedMovements);
+  const [sh, setSh] = usePersistentState("kampo-shipments-v1", shipments);
+  const history = useMemo(() => expandLegacyHistory(m), [m]);
   return (
     <Context.Provider
       value={{
+        shipments: sh,
+        setShipments: setSh,
         orders: o,
         setOrders: so,
         sales: s,
         setSales: ss,
-        movements: m,
-        setMovements: sm,
+        movements: history,
+        setMovements: (update) =>
+          sm((previous) =>
+            typeof update === "function"
+              ? update(expandLegacyHistory(previous))
+              : update,
+          ),
       }}
     >
       {children}
