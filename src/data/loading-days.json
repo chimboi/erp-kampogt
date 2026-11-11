@@ -1,0 +1,242 @@
+[
+  {
+    "name": "Adrian Lopez",
+    "days": [3],
+    "phone": "3421010161"
+  },
+  {
+    "name": "Alfonso Hdez",
+    "days": [0, 1, 3, 4, 6],
+    "phone": "42*15*444106"
+  },
+  {
+    "name": "Agro/Mario Obregon",
+    "days": [3, 5],
+    "phone": "6449973402"
+  },
+  {
+    "name": "Alvarez",
+    "days": [5],
+    "phone": "317 383 79 40"
+  },
+  {
+    "name": "Bombon",
+    "days": [0],
+    "phone": "62*157700*1"
+  },
+  {
+    "name": "Celestino",
+    "days": [1, 5],
+    "phone": "3171044740"
+  },
+  {
+    "name": "Cervantes",
+    "days": [],
+    "phone": "72*682305*4"
+  },
+  {
+    "name": "Chano Chavez",
+    "days": [1, 4, 6],
+    "phone": "152*14*76991"
+  },
+  {
+    "name": "Chato",
+    "days": [0, 3],
+    "phone": "314 157 07 28"
+  },
+  {
+    "name": "Cobian",
+    "days": [2, 5],
+    "phone": "92*1034191*1"
+  },
+  {
+    "name": "Daniel Gaytan",
+    "days": [0, 1, 2, 3, 4, 5, 6],
+    "phone": "62*1024587*2"
+  },
+  {
+    "name": "Daniel Vallarta",
+    "days": [0, 3],
+    "phone": "3334807085"
+  },
+  {
+    "name": "David Gaspar",
+    "days": [1, 4],
+    "phone": "92*964920*3"
+  },
+  {
+    "name": "Don Jose Hin",
+    "days": [4, 5],
+    "phone": "3317122433"
+  },
+  {
+    "name": "Efrain Avila",
+    "days": [3, 6],
+    "phone": ""
+  },
+  {
+    "name": "El Grullo",
+    "days": [1, 3, 5],
+    "phone": "JOSE NARVAEZ 3112646069"
+  },
+  {
+    "name": "Emannuel",
+    "days": [1, 3, 4, 6],
+    "phone": "3441014130 CEL"
+  },
+  {
+    "name": "Enrique Nuñez",
+    "days": [1],
+    "phone": ""
+  },
+  {
+    "name": "Fruteria Lobos",
+    "days": [2, 4],
+    "phone": "GABINO 3319957955"
+  },
+  {
+    "name": "Grupo Osuna",
+    "days": [2],
+    "phone": "JUAN HINOJOSA 72*11*15092"
+  },
+  {
+    "name": "Joel Medina",
+    "days": [0],
+    "phone": "PABLO 3310554135"
+  },
+  {
+    "name": "Jose Machuca",
+    "days": [2, 6],
+    "phone": "3314567860"
+  },
+  {
+    "name": "Juan (Campo)",
+    "days": [2, 4, 6],
+    "phone": "3316104565"
+  },
+  {
+    "name": "Juan Lara",
+    "days": [0, 1, 3, 4],
+    "phone": "tel 315 100 87 80"
+  },
+  {
+    "name": "Juan Gerardo Culiacan",
+    "days": [1, 4],
+    "phone": ""
+  },
+  {
+    "name": "Lazaro Montero",
+    "days": [0, 2, 3, 4, 5],
+    "phone": "3337190571"
+  },
+  {
+    "name": "Leon",
+    "days": [4],
+    "phone": "4371023961"
+  },
+  {
+    "name": "Ley",
+    "days": [1, 3, 6],
+    "phone": "JOSE LUIS 3338145693 OFI.63712341"
+  },
+  {
+    "name": "Luis Carlos Segudo",
+    "days": [2],
+    "phone": "612 1437 604"
+  },
+  {
+    "name": "Luis Flores",
+    "days": [0, 3],
+    "phone": "TEL 3111644243"
+  },
+  {
+    "name": "Luis Miercoles",
+    "days": [2],
+    "phone": "TEL3310695172"
+  },
+  {
+    "name": "Mini Shaggy",
+    "days": [0, 2, 4],
+    "phone": "42*14*49444"
+  },
+  {
+    "name": "Miguel Pachangas",
+    "days": [0, 1, 2, 3, 4, 5, 6],
+    "phone": "TEL 331018686"
+  },
+  {
+    "name": "Nevarez",
+    "days": [1],
+    "phone": "72*14*40917 TEL 15661166"
+  },
+  {
+    "name": "Oscar Nevarez",
+    "days": [1, 4, 6],
+    "phone": "72*14*40917"
+  },
+  {
+    "name": "Profe",
+    "days": [0, 1, 4],
+    "phone": "72*14*40917"
+  },
+  {
+    "name": "Pelones(Feo)",
+    "days": [0, 1, 3, 5],
+    "phone": "PATRON 3111106284"
+  },
+  {
+    "name": "Raul Vazquez",
+    "days": [0, 1, 4, 6],
+    "phone": "3112001019"
+  },
+  {
+    "name": "Reyes (Pp)",
+    "days": [4],
+    "phone": "3411624127"
+  },
+  {
+    "name": "Reyes Tepic",
+    "days": [1, 4],
+    "phone": ""
+  },
+  {
+    "name": "Roberto Ramirez",
+    "days": [2, 4, 6],
+    "phone": "6182434450"
+  },
+  {
+    "name": "Ruso",
+    "days": [1],
+    "phone": "3312809457"
+  },
+  {
+    "name": "Santillan",
+    "days": [0, 3],
+    "phone": "3171086624"
+  },
+  {
+    "name": "Vicente Alvarado",
+    "days": [0, 3],
+    "phone": "3123007037"
+  },
+  {
+    "name": "Virgilio Romero",
+    "days": [1, 4],
+    "phone": "JOSE LUIS 3141508209"
+  },
+  {
+    "name": "Zepeda",
+    "days": [6],
+    "phone": "92*928977*1"
+  },
+  {
+    "name": "Clave Internet",
+    "days": [],
+    "phone": ""
+  },
+  {
+    "name": "Maurico Descarga",
+    "days": [],
+    "phone": ""
+  }
+]

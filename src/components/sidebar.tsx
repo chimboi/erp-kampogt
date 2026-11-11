@@ -1,0 +1,146 @@
+"use client";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import {
+  LayoutDashboard,
+  MessageCircle,
+  Megaphone,
+  Truck,
+  Wallet,
+  Users,
+  Handshake,
+  ChartNoAxesCombined,
+  ChartPie,
+  Package,
+  LogOut,
+  Menu,
+  ChevronLeft,
+} from "lucide-react";
+const groups = [
+  { label: "GENERAL", items: [["/inicio", "Inicio", LayoutDashboard]] },
+  {
+    label: "CRM",
+    items: [
+      ["/crm/mensajes", "Mensajes", MessageCircle],
+      ["/crm/campanas", "Campañas", Megaphone],
+    ],
+  },
+  {
+    label: "ERP",
+    items: [
+      ["/erp/embarques", "Rentabilidad embarques", Truck],
+      ["/erp/caja", "Control de caja", Wallet],
+      ["/erp/saldo-clientes", "Saldo clientes", Users],
+      ["/erp/saldo-proveedores", "Saldo proveedores", Handshake],
+    ],
+  },
+  {
+    label: "INDICADORES",
+    items: [
+      ["/kpis/ventas", "Ventas", ChartNoAxesCombined],
+      ["/kpis/financieros", "Financieros", ChartPie],
+      ["/kpis/embarques", "Embarques por cliente", Package],
+    ],
+  },
+] as const;
+export default function Sidebar({ children }: { children: React.ReactNode }) {
+  const path = usePathname(),
+    router = useRouter(),
+    [collapsed, setCollapsed] = useState(false),
+    [mobile, setMobile] = useState(false);
+  return (
+    <div className={"shell " + (collapsed ? "collapsed" : "")}>
+      <button
+        className="mobile-menu"
+        aria-label="Abrir menú"
+        onClick={() => setMobile(!mobile)}
+      >
+        <Menu />
+      </button>
+      {mobile && (
+        <button
+          aria-label="Cerrar menú"
+          className="nav-overlay"
+          onClick={() => setMobile(false)}
+        />
+      )}
+      <aside className={"sidebar " + (mobile ? "mobile-open" : "")}>
+        <div className="brand">
+          <Image src="/logo.png" alt="Kampo" width={42} height={42} />
+          <div>
+            <strong>KAMPO GT</strong>
+            <small>PRODUCTOS DEL CAMPO</small>
+          </div>
+          <button
+            aria-label="Contraer menú"
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            <ChevronLeft size={16} />
+          </button>
+        </div>
+        <nav>
+          {groups.map((g) => (
+            <div key={g.label}>
+              <p className="nav-label">{g.label}</p>
+              {g.items.map(([href, label, Icon]) => (
+                <Link
+                  title={label}
+                  className={path === href ? "selected" : ""}
+                  href={href}
+                  key={href}
+                  onClick={() => setMobile(false)}
+                >
+                  <Icon size={19} />
+                  <span>{label}</span>
+                  {href === "/crm/mensajes" && <b>14</b>}
+                </Link>
+              ))}
+            </div>
+          ))}
+        </nav>
+        <div className="sidebar-bottom">
+          <div className="profile">
+            <span className="avatar">JG</span>
+            <div>
+              <strong>Jorge García</strong>
+              <small>Administrador</small>
+            </div>
+          </div>
+          <button
+            onClick={async () => {
+              const r = await fetch("/api/logout", { method: "POST" });
+              if (r.ok) {
+                router.replace("/entrar");
+                router.refresh();
+              }
+            }}
+          >
+            <LogOut size={18} />
+            <span>Salir</span>
+          </button>
+        </div>
+      </aside>
+      <div className="workspace">
+        <header className="topbar">
+          <span>
+            Operación <span className="muted">/ Kampo GT</span>
+          </span>
+          <div>
+            <span className="demo-dot" /> DEMO{" "}
+            <span className="top-date">10 noviembre, 2026</span>
+            <span className="avatar small">JG</span>
+          </div>
+        </header>
+        <main className="page-content">{children}</main>
+        <footer>
+          Productos del Kampo GT{" "}
+          <span>
+            Datos de demostración · Cambios guardados en este navegador
+          </span>
+        </footer>
+      </div>
+    </div>
+  );
+}
