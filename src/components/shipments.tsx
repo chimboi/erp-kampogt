@@ -424,7 +424,7 @@ function ShipmentEditor({
           <button className="primary">Guardar cambios</button>
         </div>
         <p className="muted text-xs mt-3">
-          Los ajustes se reflejan en Caja, Inicio y KPIs al guardar.
+          Los ajustes se reflejan en Control de caja y KPIs al guardar.
         </p>
       </form>
     </Modal>

@@ -15,14 +15,17 @@ import {
   suppliers,
   money,
   date,
-  shipmentName,
+  purchaseLabels,
+  salePaid,
+  saleTotal,
   type Contact,
 } from "@/data";
 import { usePersistentState, useStore } from "@/lib/store";
 import { DEFAULT_PROMPT } from "@/lib/agent/system-prompt";
 import { orderSchema, type DetectedOrder } from "@/lib/agent/schema";
 import { Badge, Modal } from "./ui";
-const contacts = [...clients.slice(0, 10), ...suppliers.slice(0, 4)];
+import CollectionEditor from "./collection-editor";
+const contacts = [...clients, ...suppliers];
 const stages = ["Cotizando", "Pedido en curso", "Esperando pago", "Cerrado"];
 const isSupplier = (c: Contact) => c.id.startsWith("p");
 const roleLabel = (c: Contact) => (isSupplier(c) ? "Proveedor" : "Cliente");
@@ -105,19 +108,23 @@ export default function Messages() {
       })
       .catch(() => setConnected(false));
   }, []);
+  const [contactStages, setContactStages] = usePersistentState<
+    Record<string, string>
+  >("kampo-contact-stages-v1", {});
   const c = contacts.find((c) => c.id === selected)!;
   const filtered = contacts.filter(
     (c, i) =>
       (kind === "Todos" ||
         (kind === "Clientes" ? c.id.startsWith("c") : c.id.startsWith("p"))) &&
       (stage === "Todos" ||
-        (stage === "Agente IA" ? agents[c.id] : stages[i % 4] === stage)) &&
+        (stage === "Agente IA"
+          ? agents[c.id]
+          : (contactStages[c.id] ?? stages[i % 4]) === stage)) &&
       c.name.toLowerCase().includes(q.toLowerCase()),
   );
   return (
     <>
-      <div className="page-title">
-        <h1>Mensajes</h1>
+      <div className="page-title message-toolbar">
         <div className="flex items-center gap-3">
           <span className={"connection " + (connected ? "online" : "")}>
             {connected ? "Agente conectado" : "Agente sin conectar"}
@@ -200,7 +207,7 @@ export default function Messages() {
                 <small>
                   {agents[c.id]
                     ? "✦ Agente IA"
-                    : stages[contacts.indexOf(c) % 4]}
+                    : (contactStages[c.id] ?? stages[contacts.indexOf(c) % 4])}
                 </small>
               </div>
               <time>10:42</time>
@@ -217,7 +224,13 @@ export default function Messages() {
           onBack={() => setMobile(false)}
           toggle={() => setAgents((a) => ({ ...a, [c.id]: !a[c.id] }))}
         />
-        <ContactPanel contact={c} />
+        <ContactPanel
+          contact={c}
+          stage={contactStages[c.id] ?? stages[contacts.indexOf(c) % 4]}
+          onStage={(value) =>
+            setContactStages((previous) => ({ ...previous, [c.id]: value }))
+          }
+        />
       </div>
       {settings && (
         <Modal title="Agente IA" onClose={() => setSettings(false)}>
@@ -480,8 +493,32 @@ function Conversation({
     </section>
   );
 }
-function ContactPanel({ contact }: { contact: Contact }) {
+function ContactPanel({
+  contact,
+  stage,
+  onStage,
+}: {
+  contact: Contact;
+  stage: string;
+  onStage: (value: string) => void;
+}) {
   const store = useStore();
+  const [collecting, setCollecting] = useState(false);
+  const pending =
+    store.sales
+      .filter((sale) => sale.client === contact.id)
+      .reduce(
+        (sum, sale) => sum + Math.max(0, saleTotal(sale) - salePaid(sale)),
+        0,
+      ) +
+    store.orders
+      .filter((order) => !order.saleId && order.client === contact.name)
+      .reduce(
+        (sum, order) =>
+          sum + Math.max(0, order.kg * order.price - (order.paid ?? 0)),
+        0,
+      );
+  const labels = purchaseLabels(store.shipments);
   const balance = store.movements
     .filter((m) => m.contact === contact.id)
     .reduce((a, m) => a + m.charge - m.payment, 0);
@@ -532,12 +569,45 @@ function ContactPanel({ contact }: { contact: Contact }) {
           ? "Saldo por pagar al proveedor"
           : "Saldo por cobrar al cliente"}
       </p>
-      <strong className="text-2xl">{money(balance)}</strong>
+      <strong className="text-2xl">
+        {money(isSupplier(contact) ? balance : pending)}
+      </strong>
       <hr />
-      <p className="label-caps">Últimos embarques</p>
+      <label className="field">
+        Estado de la conversación
+        <select
+          aria-label="Estado del contacto"
+          value={stage}
+          onChange={(event) => onStage(event.target.value)}
+        >
+          {stages.map((value) => (
+            <option key={value}>{value}</option>
+          ))}
+        </select>
+      </label>
+      {!isSupplier(contact) && (
+        <div className="crm-pending">
+          <p className="label-caps">Cobranza de ventas y pedidos</p>
+          <button
+            className="secondary"
+            disabled={pending <= 0}
+            onClick={() => setCollecting(true)}
+          >
+            Cobrar pendientes
+          </button>
+        </div>
+      )}
+      {collecting && (
+        <CollectionEditor
+          clientId={contact.id}
+          onClose={() => setCollecting(false)}
+          onSaved={() => setCollecting(false)}
+        />
+      )}
+      <p className="label-caps">Últimas compras vinculadas</p>
       {recent.map((id) => (
         <div className="recent-shipment" key={id}>
-          <strong>{shipmentName(id)}</strong>
+          <strong>{labels.get(id) ?? id}</strong>
           <small>{date(shipments.find((s) => s.id === id)!.date)}</small>
         </div>
       ))}

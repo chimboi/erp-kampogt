@@ -8,7 +8,6 @@ import {
   MessageCircle,
   Megaphone,
   Truck,
-  Wallet,
   Users,
   Handshake,
   ChartNoAxesCombined,
@@ -19,7 +18,10 @@ import {
   ChevronLeft,
 } from "lucide-react";
 const groups = [
-  { label: "GENERAL", items: [["/inicio", "Inicio", LayoutDashboard]] },
+  {
+    label: "GENERAL",
+    items: [["/inicio", "Control de caja", LayoutDashboard]],
+  },
   {
     label: "CRM",
     items: [
@@ -31,7 +33,6 @@ const groups = [
     label: "ERP",
     items: [
       ["/erp/embarques", "Rentabilidad embarques", Truck],
-      ["/erp/caja", "Control de caja", Wallet],
       ["/erp/saldo-clientes", "Saldo clientes", Users],
       ["/erp/saldo-proveedores", "Saldo proveedores", Handshake],
     ],
@@ -94,7 +95,6 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                 >
                   <Icon size={19} />
                   <span>{label}</span>
-                  {href === "/crm/mensajes" && <b>14</b>}
                 </Link>
               ))}
             </div>
@@ -123,16 +123,6 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
       <div className="workspace">
-        <header className="topbar">
-          <span>
-            Operación <span className="muted">/ Kampo GT</span>
-          </span>
-          <div>
-            <span className="demo-dot" /> DEMO{" "}
-            <span className="top-date">10 noviembre, 2026</span>
-            <span className="avatar small">JG</span>
-          </div>
-        </header>
         <main className="page-content">{children}</main>
         <footer>
           Productos del Kampo GT{" "}

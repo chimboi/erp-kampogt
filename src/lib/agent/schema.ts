@@ -1,7 +1,7 @@
 import { z } from "zod";
 export const orderSchema = z.object({
   cliente: z.string().min(1),
-  producto: z.enum(["Blanca", "Morada"]),
+  producto: z.enum(["Blanca", "Morada", "Amarilla"]),
   tamano: z.enum(["GDE", "MED", "PP", "CH"]),
   bultos: z.number().int().positive(),
   kg: z.number().positive(),
