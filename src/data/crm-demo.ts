@@ -1,4 +1,10 @@
 import type { UIMessage } from "ai";
+import {
+  emptyCatalog,
+  type CatalogState,
+  catalogProductPrice,
+  catalogFreightPrice,
+} from "./catalog";
 import { clients, suppliers, money, TODAY, type Contact } from "@/data";
 
 // A stable activity order: 1 client, 2 suppliers, 3 clients, 1 supplier.
@@ -18,13 +24,17 @@ while (ci < clients.length || pi < suppliers.length) {
     }
   }
 }
-export function demoDeal(c: Contact) {
+export function demoDeal(c: Contact, catalog: CatalogState = emptyCatalog) {
   const index = Number(c.id.slice(1));
   const supplier = c.id.startsWith("p");
   const product = (["Morada", "Blanca", "Amarilla"] as const)[index % 3];
   const kg = [750, 1200, 500, 900, 1500][index % 5];
-  const price = (supplier ? [6.8, 5.2, 6.1] : [10.5, 8.5, 9.2])[index % 3];
-  const freight = [650, 900, 450, 700, 1100][index % 5];
+  const price = supplier
+    ? [6.8, 5.2, 6.1][index % 3]
+    : catalogProductPrice(catalog, product, kg);
+  const freight =
+    (!supplier ? catalogFreightPrice(catalog, c.city) : null) ??
+    [650, 900, 450, 700, 1100][index % 5];
   const ai = index % 3 !== 2;
   return {
     supplier,
@@ -49,8 +59,11 @@ export function demoPreview(c: Contact) {
     ? `${d.kg} kg de ${d.product.toLowerCase()} a ${priceText(d.price)}/kg · flete ${money(d.freight)}`
     : `${d.kg} kg de ${d.product.toLowerCase()} · ${d.ai ? "Pedido capturado por IA" : "Precio por confirmar"}`;
 }
-export function demoMessages(c: Contact): UIMessage[] {
-  const d = demoDeal(c);
+export function demoMessages(
+  c: Contact,
+  catalog: CatalogState = emptyCatalog,
+): UIMessage[] {
+  const d = demoDeal(c, catalog);
   const who = d.ai ? "ai" : "manual";
   const entries: ["user" | "assistant", string][] = d.supplier
     ? [
@@ -98,7 +111,7 @@ export function demoMessages(c: Contact): UIMessage[] {
         ],
         [
           "assistant",
-          `${d.ai ? "Hola, soy el asistente de Kampo GT. Te ayudo a tomar el pedido. " : "Buen día, te atiende Jorge. "}La cotización es ${priceText(d.price + 0.5)}/kg. ¿La quieres en arpillas de 25 kg y para cargar mañana?`,
+          `${d.ai ? "Hola, soy el asistente de Kampo GT. Te ayudo a tomar el pedido. " : "Buen día, te atiende Jorge. "}El precio vigente del catálogo para tu volumen es ${priceText(d.price)}/kg. ¿La quieres en arpillas de 25 kg y para cargar mañana?`,
         ],
         [
           "user",

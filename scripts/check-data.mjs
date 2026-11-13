@@ -604,3 +604,145 @@ console.log(
     "PASS: reportes, costos proporcionales, pagos sin duplicados, comparativos y efectivo sin crédito.",
   );
 }
+
+// An account changes allocation, never the business balance or receipt date.
+const accountSales = [
+  { ...sales[0], account: "Banorte", paid: 100, cash: false },
+];
+const accountEntries = [
+  {
+    id: "account-receipt",
+    kind: "Cobro",
+    category: "Cobro de venta",
+    date: accountSales[0].date,
+    time: "12:00",
+    contact: "Demo",
+    description: "Cobro",
+    amount: 35,
+    account: "Efectivo",
+  },
+  {
+    id: "account-expense",
+    kind: "Gasto",
+    category: "Otros",
+    date: accountSales[0].date,
+    time: "12:00",
+    contact: "Demo",
+    description: "Pago",
+    amount: 20,
+    account: "Banorte",
+  },
+];
+const accountRows = cashRows(accountSales, accountEntries);
+const accountPeriod = {
+  start: accountSales[0].date,
+  end: accountSales[0].date,
+};
+const businessAccountSummary = cashSummary(accountRows, accountPeriod);
+const cashAccountSummary = cashSummary(
+  accountRows.filter((row) => cashExports.cashAccount(row) === "Efectivo"),
+  accountPeriod,
+);
+const bankAccountSummary = cashSummary(
+  accountRows.filter((row) => cashExports.cashAccount(row) === "Banorte"),
+  accountPeriod,
+  { ...cashOpening, amount: 0 },
+);
+for (const key of ["initial", "income", "expenses", "net", "final"])
+  assert.equal(
+    cashAccountSummary[key] + bankAccountSummary[key],
+    businessAccountSummary[key],
+    `Account reconciliation ${key}`,
+  );
+assert.equal(bankAccountSummary.sales, 100);
+assert.equal(cashAccountSummary.collections, 35);
+assert.equal(bankAccountSummary.expenses, 20);
+assert.equal(cashExports.cashAccount({}), "Efectivo");
+console.log(
+  "PASS: cuentas Efectivo/Banorte concilian apertura, entradas, salidas y cierre.",
+);
+
+// Catalog prices: volume discounts, effective dates, history, and agent parity.
+const catalogFile = new URL("../src/data/catalog.ts", import.meta.url);
+const catalogJs = ts.transpileModule(readFileSync(catalogFile, "utf8"), {
+  compilerOptions: {
+    module: ts.ModuleKind.CommonJS,
+    target: ts.ScriptTarget.ES2020,
+  },
+}).outputText;
+const catalogExports = {};
+new Function("require", "exports", catalogJs)(
+  createRequire(catalogFile),
+  catalogExports,
+);
+const {
+  catalogProducts,
+  catalogTiers,
+  catalogPrice,
+  catalogProductPrice,
+  catalogFreightPrice,
+  catalogAgentContext,
+  emptyCatalog,
+  readCatalog,
+} = catalogExports;
+const catalogDate = "2026-11-13";
+for (const product of catalogProducts) {
+  const prices = catalogTiers.map((_, i) =>
+    catalogPrice(emptyCatalog, `product:${product}:${i}`, catalogDate),
+  );
+  assert(
+    prices.every((price, i) => price > 0 && (i === 0 || price < prices[i - 1])),
+    `${product} volume discounts`,
+  );
+  for (const [kg, tier] of [
+    [49, 0],
+    [50, 1],
+    [200, 1],
+    [201, 2],
+    [499, 2],
+    [500, 3],
+    [700, 3],
+    [701, 4],
+  ])
+    assert.equal(
+      catalogProductPrice(emptyCatalog, product, kg, catalogDate),
+      prices[tier],
+      `${product} tier boundary ${kg}`,
+    );
+}
+const editedCatalog = {
+  changes: [
+    {
+      id: "catalog-test",
+      key: "product:Blanca:4",
+      date: catalogDate,
+      timestamp: "2026-11-13T12:00:00Z",
+      before: 15,
+      price: 14,
+    },
+  ],
+};
+assert.equal(
+  catalogProductPrice(editedCatalog, "Blanca", 1000, "2026-11-14"),
+  14,
+);
+assert.notEqual(
+  catalogProductPrice(editedCatalog, "Blanca", 1000, "2026-11-12"),
+  14,
+);
+assert.equal(
+  catalogFreightPrice(emptyCatalog, "León", catalogDate),
+  catalogFreightPrice(emptyCatalog, "Guanajuato", catalogDate),
+);
+assert.equal(catalogFreightPrice(emptyCatalog, "Sin ruta", catalogDate), null);
+assert(
+  catalogAgentContext(editedCatalog, catalogDate).includes("701+ kg $14.00/kg"),
+);
+assert.deepEqual(
+  readCatalog(),
+  emptyCatalog,
+  "Catalog is safe during server rendering",
+);
+console.log(
+  "PASS: catálogo, rangos, vigencias, ediciones persistentes, rutas y precios del agente.",
+);

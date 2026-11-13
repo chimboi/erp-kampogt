@@ -8,6 +8,7 @@ import {
   MessageCircle,
   Settings2,
   Store,
+  BookOpen,
   Truck,
   Users,
   Handshake,
@@ -20,20 +21,18 @@ import {
 } from "lucide-react";
 const groups = [
   {
-    label: "GENERAL",
-    items: [["/inicio", "Control de caja", LayoutDashboard]],
-  },
-  {
     label: "CRM",
     items: [
       ["/crm/mensajes", "Mensajes", MessageCircle],
       ["/crm/mercado", "Mercado", Store],
+      ["/crm/catalogo", "Catálogo", BookOpen],
       ["/crm/configuracion", "Configuración", Settings2],
     ],
   },
   {
     label: "ERP",
     items: [
+      ["/inicio", "Control de caja", LayoutDashboard],
       ["/erp/pedidos", "Rentabilidad pedidos", Truck],
       ["/erp/saldo-clientes", "Saldo clientes", Users],
       ["/erp/saldo-proveedores", "Saldo proveedores", Handshake],

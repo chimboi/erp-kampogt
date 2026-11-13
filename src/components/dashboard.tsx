@@ -2,6 +2,9 @@
 import { useState } from "react";
 import { Plus, Search } from "lucide-react";
 import SaleEditor from "./sale-editor";
+import CashAccounts from "./cash-accounts";
+import InvoiceButton from "./invoice-button";
+import AccountSelect from "./account-select";
 import CollectionEditor from "./collection-editor";
 import CostEditor from "./cost-editor";
 import { Card, Modal } from "./ui";
@@ -29,11 +32,18 @@ import {
   purchaseCostRows,
   type CashRow,
   type CashEntry,
+  type CashAccount,
+  cashAccount,
 } from "@/data/cash";
 
-export default function Dashboard() {
-  const p = usePeriod("Día"),
+export default function Dashboard({
+  initialDate: selectedDate,
+}: {
+  initialDate?: string;
+}) {
+  const p = usePeriod("Día", selectedDate),
     store = useStore();
+  const [accountsOpen, setAccountsOpen] = useState(false);
   const [tab, setTab] = useState("Números");
   const [section, setSection] = useState("Ventas");
   const [collections, setCollections] = useState(false);
@@ -127,6 +137,21 @@ export default function Dashboard() {
   const editSale = (row: CashRow) => {
     const sale = store.sales.find((sale) => sale.id === row.saleId);
     if (sale) setSaleEditor({ sale });
+  };
+  const receivedAccounts = (row: CashRow) => {
+    if (row.kind !== "Venta")
+      return row.amount > 0 ? cashAccount(row) : "Sin pago";
+    const accounts = new Set<CashAccount>();
+    if (row.amount > 0) accounts.add(cashAccount(row));
+    store.cashEntries
+      .filter(
+        (entry) =>
+          entry.kind === "Cobro" &&
+          entry.saleId === row.saleId &&
+          entry.amount > 0,
+      )
+      .forEach((entry) => accounts.add(cashAccount(entry)));
+    return [...accounts].sort().join(" + ") || "Sin cobro";
   };
   const columns: Column<CashRow>[] = [
     {
@@ -245,6 +270,62 @@ export default function Dashboard() {
           },
         ]),
     {
+      id: "account",
+      label: "Cuenta",
+      value: receivedAccounts,
+      render: (row) => {
+        const linkedCollections =
+          row.kind === "Venta" &&
+          store.cashEntries.some(
+            (entry) =>
+              entry.kind === "Cobro" &&
+              entry.saleId === row.saleId &&
+              entry.amount > 0,
+          );
+        if (linkedCollections || row.amount <= 0)
+          return (
+            <span
+              title={
+                linkedCollections
+                  ? "Cuentas de los importes recibidos. Edita la cuenta de cada cobro en Cobros."
+                  : undefined
+              }
+            >
+              {receivedAccounts(row)}
+            </span>
+          );
+        return (
+          <select
+            className="cell-select"
+            disabled={
+              row.kind !== "Venta" &&
+              !store.cashEntries.some((entry) => entry.id === row.id)
+            }
+            aria-label={`Cuenta ${row.id}`}
+            value={cashAccount(row)}
+            onChange={(event) => {
+              const account = event.target.value as CashAccount;
+              if (row.kind === "Venta")
+                store.setSales((sales) =>
+                  sales.map((sale) =>
+                    sale.id === row.saleId ? { ...sale, account } : sale,
+                  ),
+                );
+              else
+                store.setCashEntries((entries) =>
+                  entries.map((entry) =>
+                    entry.id === row.id ? { ...entry, account } : entry,
+                  ),
+                );
+            }}
+          >
+            <option>Efectivo</option>
+            <option>Banorte</option>
+          </select>
+        );
+      },
+    },
+    {
       id: "paid",
       label: section === "Ventas" ? "Recibido" : "Pagado",
       value: (row) => row.amount,
@@ -266,11 +347,29 @@ export default function Dashboard() {
           },
         ]
       : []),
+    ...(isSales
+      ? [
+          {
+            id: "invoice",
+            label: "Factura",
+            value: (row: CashRow) =>
+              (row.credit ?? 0) > 0 ? "Pendiente de cobro" : "Facturar",
+            render: (row: CashRow) => {
+              const sale = store.sales.find((item) => item.id === row.saleId);
+              return sale ? <InvoiceButton sale={sale} /> : null;
+            },
+          },
+        ]
+      : []),
   ];
   return (
     <>
       <div className="cash-page-controls">
-        <div className="cash-tabs" role="tablist" aria-label="Vista de Control de caja">
+        <div
+          className="cash-tabs"
+          role="tablist"
+          aria-label="Vista de Control de caja"
+        >
           {["Números", "Reporte"].map((name) => (
             <button
               key={name}
@@ -283,7 +382,12 @@ export default function Dashboard() {
             </button>
           ))}
         </div>
-        <PeriodPicker state={p} />
+        <div className="cash-actions">
+          <button className="secondary" onClick={() => setAccountsOpen(true)}>
+            Cuentas
+          </button>
+          <PeriodPicker state={p} />
+        </div>
       </div>
       {tab === "Números" ? (
         <>
@@ -452,6 +556,13 @@ export default function Dashboard() {
       ) : (
         <DashboardReport p={p} />
       )}
+      {accountsOpen && (
+        <CashAccounts
+          rows={allRows}
+          period={p.period}
+          onClose={() => setAccountsOpen(false)}
+        />
+      )}
       {collectionEditor && (
         <CollectionEditor
           saleId={collectionEditor.saleId}
@@ -545,6 +656,7 @@ function CashEntryEditor({
       (kind === "Gasto" ? operatingCategories[0] : "Cobro de días anteriores"),
   );
   const [entryDate, setEntryDate] = useState(entry?.date ?? initialDate);
+  const [account, setAccount] = useState<CashAccount>(cashAccount(entry ?? {}));
   const [error, setError] = useState("");
   const previousDate = new Date(
     new Date(entryDate + "T12:00:00Z").getTime() - 86400000,
@@ -591,6 +703,7 @@ function CashEntryEditor({
             clientId,
             description: String(form.get("description")).trim(),
             amount,
+            account,
             originDate,
           });
         }}
@@ -709,6 +822,7 @@ function CashEntryEditor({
             }
           />
         </label>
+        <AccountSelect value={account} onChange={setAccount} />
         <label>
           Monto recibido / pagado
           <input

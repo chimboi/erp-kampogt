@@ -1,0 +1,140 @@
+.catalog-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.catalog-heading h1 {
+  margin: 5px 0 8px;
+}
+.catalog-heading .eyebrow {
+  color: #3c8550;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+}
+.catalog-date {
+  display: grid;
+  gap: 7px;
+  font-size: 12px;
+  color: #61766b;
+}
+.catalog-date input {
+  border: 1px solid #dae5dd;
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: white;
+}
+.catalog-agent-note {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px;
+  border: 1px solid #d6e8db;
+  border-radius: 12px;
+  background: #f1f8f2;
+  margin-bottom: 22px;
+  color: #2d6940;
+}
+.catalog-agent-note p {
+  margin: 5px 0 0;
+  font-size: 12px;
+  color: #607566;
+}
+.catalog-agent-note .badge {
+  margin-left: auto;
+}
+.catalog-page .cash-tabs {
+  margin-bottom: 18px;
+}
+.catalog-page .cash-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.catalog-table-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.catalog-table-head h2 {
+  font-size: 17px;
+  margin: 0 0 5px;
+}
+.catalog-table-head p {
+  margin: 0;
+  font-size: 12px;
+}
+.catalog-table-head > span {
+  font-size: 11px;
+}
+.catalog-price {
+  font-weight: 650;
+  padding: 6px 8px;
+  margin: -6px -8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.catalog-price:hover {
+  background: #f2f7f3;
+  border-color: #c9dece;
+}
+.catalog-price span {
+  color: #8aa292;
+  font-size: 12px;
+  margin-left: 4px;
+}
+.catalog-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  max-width: 220px;
+}
+.catalog-edit input {
+  width: 94px;
+  padding: 5px;
+  border: 1px solid #86ad8f;
+  border-radius: 4px;
+}
+.catalog-edit small {
+  width: 100%;
+  color: #b84343;
+  white-space: normal;
+}
+.catalog-agent-price,
+.catalog-down {
+  color: #2d8450;
+}
+.catalog-up {
+  color: #a87729;
+}
+.catalog-notice {
+  padding: 10px 14px;
+  background: #edf8ee;
+  border-radius: 8px;
+  color: #367947;
+  font-size: 12px;
+}
+.catalog-footnote {
+  color: #7a8c80;
+  font-size: 11px;
+  margin-top: 15px;
+}
+.catalog-page .text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+@media (max-width: 720px) {
+  .catalog-heading,
+  .catalog-table-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,73 @@
+.modal:has(.account-cut) {
+  width: min(920px, 95vw);
+  max-width: 920px;
+}
+.account-cut-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 8px 0 22px;
+}
+.account-cut-heading p {
+  color: var(--muted);
+  margin-top: 12px;
+  font-size: 13px;
+}
+.account-cut-badge {
+  display: inline-flex;
+  border-radius: 30px;
+  padding: 9px 16px;
+  background: #eeecf8;
+  color: #302475;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+}
+.account-cut table {
+  min-width: 620px;
+  width: 100%;
+}
+.account-cut td {
+  padding: 0 !important;
+}
+.account-value {
+  display: block;
+  padding: 18px 16px;
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.account-value.income {
+  color: #059669;
+  background: #edf8f2;
+}
+.account-value.expense {
+  color: #e33c58;
+  background: #fff1f3;
+}
+.account-value.detail {
+  font-size: 14px;
+  font-weight: 400;
+  background: #f7fbf9;
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+.account-value.opening {
+  color: #727787;
+}
+.account-value.closing {
+  background: #f5f5fa;
+  border-top: 3px solid #d8d9e1;
+  font-size: 20px;
+  font-weight: 750;
+}
+.account-value.account-total {
+  border-left: 2px solid #e1e3e9;
+}
+.account-cut-note {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  padding: 12px 0 0;
+}

@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import AccountSelect from "./account-select";
+import type { CashAccount } from "@/data/cash";
 import { Modal } from "./ui";
 import { suppliers, purchaseLabels, type Shipment } from "@/data";
 import { cashMoney, costCategories, type CashEntry } from "@/data/cash";
@@ -14,6 +16,7 @@ export default function CostEditor({
   onSave: (entry: CashEntry, purchase?: Shipment) => void;
   onClose: () => void;
 }) {
+  const [account, setAccount] = useState<CashAccount>("Efectivo");
   const [category, setCategory] = useState<string>("Compras");
   const [supplierId, setSupplierId] = useState("p6");
   const [kg, setKg] = useState("");
@@ -99,6 +102,7 @@ export default function CostEditor({
                 ? `Compra de cebolla ${purchase!.product.toLowerCase()}`
                 : String(form.get("description")).trim(),
               amount: Math.round(paid * 100) / 100,
+              account,
               purchaseId: purchase?.id ?? (linkedId || undefined),
               total: isPurchase ? total : undefined,
             },
@@ -272,6 +276,7 @@ export default function CostEditor({
             </span>
           </div>
         )}
+        <AccountSelect value={account} onChange={setAccount} />
         {error && (
           <p role="alert" className="out">
             {error}

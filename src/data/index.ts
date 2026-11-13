@@ -63,6 +63,7 @@ export const suppliers: Contact[] = [
   balance: 280000 - i * 31000,
 }));
 export type Sale = {
+  account?: "Efectivo" | "Banorte";
   time?: string;
   id: string;
   shipment: string;

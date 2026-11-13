@@ -40,6 +40,16 @@ import { DEFAULT_PROMPT } from "@/lib/agent/system-prompt";
 import { orderSchema, type DetectedOrder } from "@/lib/agent/schema";
 import { FRIENDLY_PROMPT } from "@/data/crm-agent-prompt";
 import CollectionEditor from "./collection-editor";
+import SaleEditor from "./sale-editor";
+import InvoiceButton from "./invoice-button";
+import {
+  CATALOG_KEY,
+  emptyCatalog,
+  catalogAgentContext,
+  catalogProductPrice,
+  readCatalog,
+  type CatalogState,
+} from "@/data/catalog";
 import {
   DEFAULT_AUTOMATION,
   reminderClients,
@@ -522,21 +532,27 @@ function Conversation({
   onBack: () => void;
   toggle: () => void;
 }) {
+  const [catalog] = usePersistentState<CatalogState>(CATALOG_KEY, emptyCatalog);
+  const [registration, setRegistration] = useState<{
+    order: DetectedOrder;
+    id: string;
+  } | null>(null);
+  const [collectSale, setCollectSale] = useState<string | null>(null);
   const store = useStore(),
     [input, setInput] = useState(""),
     [notice, setNotice] = useState(""),
     [showHistory, setShowHistory] = useState(false),
     [, setSaved] = usePersistentState<UIMessage[]>(
       "kampo-chat-" + contact.id,
-      seed(contact),
+      seed(contact, catalog),
     ),
-    [created, setCreated] = usePersistentState<string[]>(
+    [, setCreated] = usePersistentState<string[]>(
       "kampo-created-" + contact.id,
       [],
     );
   const { messages, sendMessage, setMessages, stop, status, error } = useChat({
     id: contact.id,
-    messages: seed(contact),
+    messages: seed(contact, catalog),
     transport: new DefaultChatTransport({ api: "/api/agent" }),
   });
   useEffect(
@@ -549,6 +565,7 @@ function Conversation({
     loaded = useRef(false);
   useEffect(() => {
     if (!loaded.current) {
+      setMessages(seed(contact, readCatalog()));
       try {
         const raw = localStorage.getItem("kampo-chat-" + contact.id);
         if (raw) {
@@ -560,7 +577,7 @@ function Conversation({
                 m.id !== contact.id + "a" &&
                 m.id !== contact.id + "b",
             );
-            setMessages([...seed(contact), ...custom]);
+            setMessages([...seed(contact, readCatalog()), ...custom]);
           }
         }
       } catch {}
@@ -575,30 +592,13 @@ function Conversation({
     if (!resetting.current && loaded.current && status === "ready")
       setSaved(messages);
   }, [messages, status, setSaved, resetting]);
-  const isCreated = (id: string) =>
-    created.includes(id) || store.orders.some((o) => o.id === "IA-" + id);
+  const registeredSale = (id: string) => {
+    const order = store.orders.find((o) => o.id === "IA-" + id);
+    return store.sales.find((sale) => sale.id === order?.saleId);
+  };
+  const isCreated = (id: string) => !!registeredSale(id);
   function create(d: DetectedOrder, id: string) {
-    if (isCreated(id)) return;
-    store.setOrders((o) => [
-      ...o,
-      {
-        id: "IA-" + id,
-        client: d.cliente,
-        product: d.producto,
-        kg: d.kg,
-        price: d.precio_kg,
-        date: d.fecha_carga,
-        status:
-          id.startsWith("demo-v2-") || id.startsWith("reminder-")
-            ? "Por confirmar"
-            : "Pendiente de carga",
-        size: d.tamano,
-        freight: d.flete,
-        destination: d.destino,
-        bags: d.bultos,
-      },
-    ]);
-    setCreated((c) => [...c, id]);
+    if (!isCreated(id)) setRegistration({ order: d, id });
   }
   return (
     <section
@@ -607,6 +607,83 @@ function Conversation({
         (isSupplier(contact) ? "supplier-conversation" : "client-conversation")
       }
     >
+      {registration && (
+        <SaleEditor
+          title="Registrar pedido en control de caja"
+          purchases={store.shipments}
+          initialDate={new Intl.DateTimeFormat("en-CA", {
+            timeZone: "America/Mexico_City",
+          }).format(new Date())}
+          sale={{
+            id: "sale-IA-" + registration.id,
+            client: contact.id,
+            product: registration.order.producto,
+            kg: registration.order.kg,
+            price: registration.order.precio_kg,
+            shipment:
+              store.shipments
+                .filter(
+                  (p) =>
+                    p.product === registration.order.producto &&
+                    p.date <= new Date().toISOString().slice(0, 10),
+                )
+                .sort((a, b) => b.date.localeCompare(a.date))[0]?.id ?? "",
+            date: new Intl.DateTimeFormat("en-CA", {
+              timeZone: "America/Mexico_City",
+            }).format(new Date()),
+            time: new Date().toTimeString().slice(0, 5),
+            cash: false,
+            paid: 0,
+          }}
+          onClose={() => setRegistration(null)}
+          onSave={(sale) => {
+            if (registeredSale(registration.id)) {
+              setRegistration(null);
+              return;
+            }
+            store.setSales((rows) =>
+              rows.some((s) => s.id === sale.id) ? rows : [...rows, sale],
+            );
+            const purchase = store.shipments.find(
+              (p) => p.id === sale.shipment,
+            );
+            const order = {
+              id: "IA-" + registration.id,
+              saleId: sale.id,
+              client:
+                clients.find((c) => c.id === sale.client)?.name ?? sale.client,
+              product: sale.product,
+              kg: sale.kg,
+              price: sale.price,
+              date: sale.date,
+              time: sale.time,
+              status: "Pendiente de carga",
+              supplier: purchase?.supplier,
+              purchase: purchase?.purchase,
+              size: registration.order.tamano,
+              freight: registration.order.flete,
+              destination: registration.order.destino,
+              bags: registration.order.bultos,
+            };
+            store.setOrders((rows) => [
+              ...rows.filter((o) => o.id !== order.id),
+              order,
+            ]);
+            setCreated((rows) => [...new Set([...rows, registration.id])]);
+            setRegistration(null);
+            setNotice(
+              "Pedido y venta registrados. El cobro se registra por separado.",
+            );
+          }}
+        />
+      )}
+      {collectSale && (
+        <CollectionEditor
+          saleId={collectSale}
+          onClose={() => setCollectSale(null)}
+          onSaved={() => setCollectSale(null)}
+        />
+      )}
       <header>
         <button
           className="back-chat"
@@ -663,7 +740,7 @@ function Conversation({
                 )
               : []
             : messages),
-          ...reminderMessages(contact, reminder),
+          ...reminderMessages(contact, reminder, catalog),
           ...(reminder
             ? messages.filter((m) =>
                 m.id.startsWith(`manual-reminder-${reminder.batchId}-`),
@@ -731,6 +808,12 @@ function Conversation({
                       {d.destino} · Carga {date(d.fecha_carga)}
                     </p>
                     <p>Flete: {money(d.flete)}</p>
+                    <p className="muted">
+                      Precio catálogo hoy:{" "}
+                      {crmMoney(catalogProductPrice(catalog, d.producto, d.kg))}
+                      /kg · Se conserva el precio de esta cotización al
+                      registrar.
+                    </p>
                     {d.kg > 5000 && (
                       <p>Precio sujeto a autorización de Jorge.</p>
                     )}
@@ -740,9 +823,38 @@ function Conversation({
                       onClick={() => create(d, id)}
                     >
                       {isCreated(id)
-                        ? "Pedido creado"
-                        : "Crear pedido por confirmar"}
+                        ? "Pedido registrado en caja"
+                        : "Registrar venta"}
                     </button>
+                    {registeredSale(id) && (
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 8,
+                          flexWrap: "wrap",
+                          marginTop: 8,
+                        }}
+                      >
+                        <Link
+                          className="secondary"
+                          href={`/inicio?fecha=${registeredSale(id)!.date}`}
+                        >
+                          Ver control de caja
+                        </Link>
+                        <InvoiceButton sale={registeredSale(id)!} />
+                        {salePaid(registeredSale(id)!) <
+                          saleTotal(registeredSale(id)!) && (
+                          <button
+                            className="primary"
+                            onClick={() =>
+                              setCollectSale(registeredSale(id)!.id)
+                            }
+                          >
+                            Registrar cobro
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               }
@@ -804,6 +916,8 @@ function Conversation({
                 body: {
                   system:
                     system +
+                    "\n" +
+                    catalogAgentContext(catalog) +
                     `\nContacto actual: ${contact.name}. Rol: ${roleLabel(contact)}. ` +
                     (isSupplier(contact)
                       ? "Actúa como comprador de Kampo GT. Recaba cotización, origen, tamaños, kilos, precio y flete. No uses registrarPedido: es exclusiva para ventas a clientes."
@@ -1006,7 +1120,8 @@ function ContactPanel({
 }
 
 function DealSummary({ contact }: { contact: Contact }) {
-  const d = demoDeal(contact);
+  const [catalog] = usePersistentState<CatalogState>(CATALOG_KEY, emptyCatalog);
+  const d = demoDeal(contact, catalog);
   return (
     <div className="crm-deal-summary">
       <strong>

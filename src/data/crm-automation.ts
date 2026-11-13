@@ -1,3 +1,4 @@
+import { emptyCatalog, type CatalogState } from "./catalog";
 import type { UIMessage } from "ai";
 import { clients, type Contact } from "@/data";
 import { demoDeal } from "./crm-demo";
@@ -72,9 +73,13 @@ export function reminderText(template: string, c: Contact, date: string) {
     }),
   );
 }
-export function reminderMessages(c: Contact, r?: Reminder): UIMessage[] {
+export function reminderMessages(
+  c: Contact,
+  r?: Reminder,
+  catalog: CatalogState = emptyCatalog,
+): UIMessage[] {
   if (!r) return [];
-  const d = demoDeal(c);
+  const d = demoDeal(c, catalog);
   const texts = [
     r.text,
     `Gracias por avisar. Para mañana necesito ${d.kg} kg de ${d.product.toLowerCase()}, en arpillas de 25 kg. ¿A cómo me la dejas y cuánto sale el flete a ${c.city}?`,

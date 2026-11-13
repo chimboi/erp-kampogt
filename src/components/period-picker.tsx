@@ -47,9 +47,9 @@ export function getPeriod(mode: string, anchor: string): Period {
 }
 export const within = (date: string, p: Period) =>
   date >= p.start && date <= p.end;
-export function usePeriod(initial = "Mes") {
+export function usePeriod(initial = "Mes", initialAnchor = TODAY) {
   const [mode, setMode] = useState(initial),
-    [anchor, setAnchor] = useState(TODAY),
+    [anchor, setAnchor] = useState(initialAnchor),
     [range, setRange] = useState({ start: "2026-01-01", end: TODAY });
   const period = mode === "Rango" ? range : getPeriod(mode, anchor);
   return { mode, setMode, anchor, setAnchor, range, setRange, period };

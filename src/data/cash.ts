@@ -40,7 +40,13 @@ export const expenseCategories = [
   "Comidas",
   "Otros",
 ] as const;
+export type CashAccount = "Efectivo" | "Banorte";
+export const cashAccounts: CashAccount[] = ["Efectivo", "Banorte"];
+export function cashAccount(row: { account?: CashAccount }) {
+  return row.account ?? "Efectivo";
+}
 export type CashEntry = {
+  account?: CashAccount;
   id: string;
   date: string;
   time: string;
@@ -208,6 +214,7 @@ export function cashRows(
     ...allSales.map((sale): CashRow => ({
       id: `receipt-${sale.id}`,
       saleId: sale.id,
+      account: sale.account,
       kg: sale.kg,
       price: sale.price,
       purchase: labels.get(sale.shipment) ?? sale.shipment,

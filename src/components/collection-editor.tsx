@@ -8,26 +8,36 @@ import {
   clientName,
   shortOrderId,
   date,
-  TODAY,
 } from "@/data";
+import AccountSelect from "./account-select";
+import type { CashAccount } from "@/data/cash";
 import { cashMoney } from "@/data/cash";
 import { Modal } from "./ui";
 export default function CollectionEditor({
   saleId,
+  orderId,
   clientId,
   onClose,
   onSaved,
 }: {
   saleId?: string;
+  orderId?: string;
   clientId?: string;
   onClose: () => void;
   onSaved: (date: string) => void;
 }) {
   const store = useStore();
-  const [paymentDate, setPaymentDate] = useState(TODAY);
-  const [scope, setScope] = useState(saleId ? "Todos" : "Este mes");
+  const [account, setAccount] = useState<CashAccount>("Efectivo");
+  const [paymentDate, setPaymentDate] = useState(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Mexico_City",
+    }).format(new Date()),
+  );
+  const [scope, setScope] = useState(saleId || orderId ? "Todos" : "Este mes");
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState(saleId ? `sale:${saleId}` : "");
+  const [selected, setSelected] = useState(
+    saleId ? `sale:${saleId}` : orderId ? `order:${orderId}` : "",
+  );
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
   const targets = [
@@ -112,6 +122,7 @@ export default function CollectionEditor({
             date: paymentDate,
             time: "12:00",
             amount: value,
+            account,
           });
           if (!accepted) {
             setError(
@@ -210,6 +221,7 @@ export default function CollectionEditor({
             onChange={(event) => setAmount(event.target.value)}
           />
         </label>
+        <AccountSelect value={account} onChange={setAccount} />
         {error && (
           <p className="out" role="alert">
             {error}
