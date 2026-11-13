@@ -1,7 +1,30 @@
 "use client";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  CalendarDays,
+  ChevronDown,
+} from "lucide-react";
 import { TODAY } from "@/data";
+export const compactDate = (value: string) => {
+  const [, month, day] = value.split("-");
+  const months = [
+    "ene",
+    "feb",
+    "mar",
+    "abr",
+    "may",
+    "jun",
+    "jul",
+    "ago",
+    "sep",
+    "oct",
+    "nov",
+    "dic",
+  ];
+  return `${Number(day)}-${months[Number(month) - 1] ?? month}`;
+};
 export type Period = { start: string; end: string };
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 export function getPeriod(mode: string, anchor: string): Period {
@@ -33,10 +56,19 @@ export function usePeriod(initial = "Mes") {
 }
 export function PeriodPicker({
   state,
+  compact = false,
 }: {
   state: ReturnType<typeof usePeriod>;
+  compact?: boolean;
 }) {
   const { mode, setMode, anchor, setAnchor, range, setRange, period } = state;
+  const label = (value: string) =>
+    compact
+      ? compactDate(value) +
+        (period.start.slice(0, 4) !== period.end.slice(0, 4)
+          ? ` ${value.slice(0, 4)}`
+          : "")
+      : value;
   function move(n: number) {
     const d = new Date(anchor + "T12:00:00Z");
     if (mode === "Mes") {
@@ -53,59 +85,114 @@ export function PeriodPicker({
           <button
             key={m}
             className={mode === m ? "active" : ""}
-            onClick={() => setMode(m)}
+            onClick={() => {
+              if (m === "Rango") setRange(period);
+              setMode(m);
+            }}
           >
             {m}
           </button>
         ))}
       </div>
-      {mode === "Rango" ? (
-        <div className="flex gap-2">
-          <input
-            aria-label="Desde"
-            type="date"
-            value={range.start}
-            max={range.end}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value)
-                setRange({
-                  start: value,
-                  end: value > range.end ? value : range.end,
-                });
-            }}
-          />
-          <input
-            aria-label="Hasta"
-            type="date"
-            min={range.start}
-            value={range.end}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value)
-                setRange({
-                  end: value,
-                  start: value < range.start ? value : range.start,
-                });
-            }}
-          />
-        </div>
-      ) : (
-        <div className="date-nav">
-          <button aria-label="Periodo anterior" onClick={() => move(-1)}>
-            <ChevronLeft size={16} />
-          </button>
-          <CalendarDays size={15} />
-          <span>
-            {period.start === period.end
-              ? period.start
-              : `${period.start} — ${period.end}`}
-          </span>
-          <button aria-label="Periodo siguiente" onClick={() => move(1)}>
-            <ChevronRight size={16} />
-          </button>
-        </div>
-      )}
+      <div className="date-nav">
+        <button
+          aria-label="Periodo anterior"
+          disabled={mode === "Rango"}
+          onClick={() => move(-1)}
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <details className="date-dropdown">
+          <summary>
+            <CalendarDays size={15} />
+            <span title={`${period.start} — ${period.end}`}>
+              {period.start === period.end
+                ? label(period.start)
+                : `${label(period.start)} — ${label(period.end)}`}
+            </span>
+            <ChevronDown size={14} />
+          </summary>
+          <div className="date-popover">
+            <label>
+              Selección de fecha
+              <select
+                aria-label="Tipo de selección de fecha"
+                value={mode === "Rango" ? "Rango" : "Fecha"}
+                onChange={(e) => {
+                  if (e.target.value === "Rango") {
+                    setRange(period);
+                    setMode("Rango");
+                  } else setMode("Día");
+                }}
+              >
+                <option value="Fecha">Fecha</option>
+                <option value="Rango">Rango personalizado</option>
+              </select>
+            </label>
+            {mode === "Rango" ? (
+              <>
+                <label>
+                  Desde
+                  <input
+                    aria-label="Desde"
+                    type="date"
+                    value={range.start}
+                    max={range.end}
+                    onChange={(e) => {
+                      if (e.target.value)
+                        setRange({
+                          start: e.target.value,
+                          end:
+                            e.target.value > range.end
+                              ? e.target.value
+                              : range.end,
+                        });
+                    }}
+                  />
+                </label>
+                <label>
+                  Hasta
+                  <input
+                    aria-label="Hasta"
+                    type="date"
+                    value={range.end}
+                    min={range.start}
+                    onChange={(e) => {
+                      if (e.target.value)
+                        setRange({
+                          end: e.target.value,
+                          start:
+                            e.target.value < range.start
+                              ? e.target.value
+                              : range.start,
+                        });
+                    }}
+                  />
+                </label>
+              </>
+            ) : (
+              <label>
+                Fecha
+                <input
+                  aria-label="Fecha del periodo"
+                  type="date"
+                  value={anchor}
+                  onChange={(e) => {
+                    if (e.target.value) setAnchor(e.target.value);
+                  }}
+                />
+              </label>
+            )}
+          </div>
+        </details>
+        <button
+          aria-label="Periodo siguiente"
+          disabled={mode === "Rango"}
+          onClick={() => move(1)}
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,3 @@
+Generated with the built-in image_gen tool for CRM demo conversations.
+Prompt: Create a realistic casual smartphone photograph for a Mexican onion wholesaler CRM demonstration conversation: three open mesh sacks side by side containing white onions, purple red onions and yellow onions respectively, on a wooden pallet in a modest wholesale produce warehouse. Close view with clearly visible healthy onions, natural daylight, practical unstyled quality-inspection photo, no text, no watermark, landscape 3:2.
+Asset: public/crm/cebollas-demo.jpg

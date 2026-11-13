@@ -1,1 +1,4 @@
-export { default } from "@/components/campaigns";
+import { redirect } from "next/navigation";
+export default function Page() {
+  redirect("/crm/configuracion");
+}

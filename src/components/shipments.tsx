@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import {
   clients,
@@ -12,11 +12,16 @@ import {
   number,
   date,
   clientName,
+  purchaseLabels,
+  shortOrderId,
+  saleProfitability,
   type Shipment,
   type Sale,
 } from "@/data";
-import { Card, Kpi, Badge, Table, Modal, Empty } from "./ui";
-import { PeriodPicker, usePeriod, within } from "./period-picker";
+import { Kpi, Badge, Modal } from "./ui";
+import { PeriodPicker, usePeriod, within, compactDate } from "./period-picker";
+import { DataTable, type Column } from "./data-table";
+import { cashMoney } from "@/data/cash";
 // Display names for demo aliases; source contacts and account IDs stay intact.
 const demoNames: Record<string, string> = {
   Abarrey: "Carlos Ramírez",
@@ -44,138 +49,183 @@ const expenses = [
   ["scale3", "Báscula 3"],
   ["handling", "Maniobra"],
 ] as const;
+const monthLabel = (value: string) =>
+  new Date(value.slice(0, 7) + "-01T12:00:00").toLocaleDateString("es-MX", {
+    month: "short",
+    year: "2-digit",
+  });
+
 export default function Shipments() {
   const store = useStore(),
     p = usePeriod(),
-    [selected, setSelected] = useState<string | null>(null),
-    [q, setQ] = useState("");
-  const rows = store.shipments.filter(
-    (s) =>
-      (within(s.date, p.period) ||
-        store.sales.some(
-          (v) => v.shipment === s.id && within(v.date, p.period),
-        )) &&
-      [
-        s.name,
-        suppliers.find((p) => p.id === s.supplier)?.name,
-        ...store.sales
-          .filter((v) => v.shipment === s.id)
-          .map((v) => buyerName(v.client)),
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(q.toLowerCase()),
+    [selected, setSelected] = useState<string | null>(null);
+  const purchases = new Map(store.shipments.map((s) => [s.id, s]));
+  const labels = purchaseLabels(store.shipments);
+  const orderIds = new Map(
+    store.orders
+      .filter((order) => order.saleId)
+      .map((order) => [order.saleId, shortOrderId(order.id)]),
   );
-  const total = (id: string) =>
-    store.sales
-      .filter((v) => v.shipment === id && within(v.date, p.period))
-      .reduce((a, v) => a + saleTotal(v), 0);
-  const revenue = rows.reduce((a, s) => a + total(s.id), 0),
-    expense = rows
-      .filter((s) => within(s.date, p.period))
-      .reduce((a, s) => a + cost(s), 0);
-  const current = store.shipments.find((s) => s.id === selected);
-  return (
-    <>
-      <div className="page-title">
-        <h1>Rentabilidad embarques</h1>
-      </div>
-      <PeriodPicker state={p} />
-      <div className="kpis">
-        <Kpi label="Embarques" value={number(rows.length)} />
-        <Kpi
-          label="Kilos comprados"
-          value={number(rows.reduce((a, s) => a + s.kg, 0))}
-        />
-        <Kpi label="Venta total" value={money(revenue)} />
-        <Kpi
-          label="Utilidad del periodo"
-          value={money(revenue - expense)}
-          detail={`${revenue ? (((revenue - expense) / revenue) * 100).toFixed(1) : 0}% de margen`}
-        />
-      </div>
-      <Card>
-        <div className="section-heading">
-          <h2>Liquidaciones</h2>
-          <input
-            aria-label="Buscar embarque"
-            placeholder="Embarque, proveedor o cliente…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </div>
-        <Table
-          heads={[
-            "Fecha",
-            "Embarque",
-            "Proveedor",
-            "Cliente",
-            "Kg comprados",
-            "Venta",
-            "Efectivo",
-            "Crédito",
-            "Gastos",
-            "Utilidad",
-            "",
-          ]}
+  const rows = store.sales
+    .filter((sale) => within(sale.date, p.period))
+    .map((sale) => ({
+      ...sale,
+      ...saleProfitability(sale, purchases.get(sale.shipment)),
+    }))
+    .sort(
+      (a, b) =>
+        b.date.localeCompare(a.date) ||
+        (b.time ?? "").localeCompare(a.time ?? ""),
+    );
+  type Row = (typeof rows)[number];
+  const columns: Column<Row>[] = [
+    {
+      id: "id",
+      label: "Pedido",
+      value: (r) => r.id,
+      render: (r) => (
+        <span title={r.id}>{orderIds.get(r.id) ?? r.id.slice(0, 8)}</span>
+      ),
+    },
+    {
+      id: "month",
+      label: "Mes",
+      value: (r) => r.date.slice(0, 7),
+      filterValue: (r) => `${r.date.slice(0, 7)} ${monthLabel(r.date)}`,
+      render: (r) => monthLabel(r.date),
+    },
+    {
+      id: "date",
+      label: "Fecha",
+      value: (r) => `${r.date} ${r.time ?? ""}`,
+      render: (r) => (
+        <span title={`${r.date} ${r.time ?? ""}`}>{compactDate(r.date)}</span>
+      ),
+    },
+    {
+      id: "client",
+      label: "Cliente",
+      value: (r) => clientName(r.client),
+      render: (r) => (
+        <span title={clientName(r.client)}>{clientName(r.client)}</span>
+      ),
+    },
+    { id: "product", label: "Producto", value: (r) => r.product },
+    {
+      id: "purchase",
+      label: "Compra",
+      value: (r) => labels.get(r.shipment) ?? r.shipment,
+      render: (r) => (
+        <button
+          className="text-link"
+          title={labels.get(r.shipment) ?? r.shipment}
+          onClick={() => setSelected(r.shipment)}
         >
-          {rows.map((s) => {
-            const sales = store.sales.filter(
-                (v) => v.shipment === s.id && within(v.date, p.period),
-              ),
-              buyers = Array.from(
-                new Set(sales.map((v) => buyerName(v.client))),
-              ),
-              revenue = sales.reduce((a, v) => a + saleTotal(v), 0),
-              cash = sales
-                .filter((v) => v.cash)
-                .reduce((a, v) => a + saleTotal(v), 0);
-            return (
-              <tr key={s.id}>
-                <td>{date(s.date)}</td>
-                <td>
-                  <button
-                    className="text-link"
-                    onClick={() => setSelected(s.id)}
-                  >
-                    {s.name}
-                  </button>
-                </td>
-                <td>
-                  {displayName(
-                    suppliers.find((supplier) => supplier.id === s.supplier)
-                      ?.name ?? "",
-                  )}
-                </td>
-                <td className="buyer-cell">
-                  {buyers.map((name) => (
-                    <span key={name} className="buyer-name">
-                      {name}
-                    </span>
-                  ))}
-                </td>
-                <td>{number(s.kg)}</td>
-                <td>{money(revenue)}</td>
-                <td>{money(cash)}</td>
-                <td>{money(revenue - cash)}</td>
-                <td>{money(cost(s))}</td>
-                <td className={revenue >= cost(s) ? "positive" : "negative"}>
-                  {money(revenue - cost(s))}
-                </td>
-                <td>
-                  <button
-                    className="secondary"
-                    onClick={() => setSelected(s.id)}
-                  >
-                    <Pencil size={13} /> Ajustar
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </Table>
-        {!rows.length && <Empty />}
-      </Card>
+          {labels.get(r.shipment) ?? "Sin compra"}
+        </button>
+      ),
+    },
+    { id: "kg", label: "KG", value: (r) => r.kg, render: (r) => number(r.kg) },
+    {
+      id: "price",
+      label: "Venta/kg",
+      value: (r) => r.price,
+      render: (r) => cashMoney(r.price),
+    },
+    {
+      id: "purchasePrice",
+      label: "Compra/kg",
+      value: (r) => r.purchasePrice ?? -1,
+      render: (r) =>
+        r.purchasePrice === null ? "Sin costo" : cashMoney(r.purchasePrice),
+    },
+    {
+      id: "revenue",
+      label: "Venta",
+      value: (r) => r.revenue,
+      render: (r) => cashMoney(r.revenue),
+    },
+    {
+      id: "expense",
+      label: "Gastos",
+      value: (r) => r.expense ?? -1,
+      render: (r) => (r.expense === null ? "Sin costo" : cashMoney(r.expense)),
+    },
+    {
+      id: "profit",
+      label: "Utilidad",
+      value: (r) => r.profit ?? -Infinity,
+      render: (r) =>
+        r.profit === null ? (
+          "—"
+        ) : (
+          <span className={r.profit >= 0 ? "positive" : "negative"}>
+            {cashMoney(r.profit)}
+          </span>
+        ),
+    },
+    {
+      id: "margin",
+      label: "Margen %",
+      value: (r) => r.margin ?? -Infinity,
+      render: (r) => (r.margin === null ? "—" : `${r.margin.toFixed(1)}%`),
+    },
+  ];
+  const current = purchases.get(selected ?? "");
+  return (
+    <section className="profitability-page">
+      <div className="page-title">
+        <h1>Rentabilidad pedidos</h1>
+      </div>
+      <PeriodPicker state={p} compact />
+      <DataTable
+        rows={rows}
+        columns={columns}
+        rowId={(r) => r.id}
+        initialSort={{ id: "month", direction: "desc" }}
+        renderSummary={(visible) => {
+          const revenue = visible.reduce((sum, r) => sum + r.revenue, 0);
+          const expense = visible.reduce((sum, r) => sum + (r.expense ?? 0), 0);
+          const incomplete = visible.some((r) => r.expense === null);
+          return (
+            <>
+              <div className="kpis profitability-kpis">
+                <Kpi label="#pedidos" value={number(visible.length)} />
+                <Kpi label="$ventas" value={cashMoney(revenue)} />
+                <Kpi
+                  label="$gastos"
+                  value={incomplete ? "—" : cashMoney(expense)}
+                />
+                <Kpi
+                  label="$margen"
+                  value={incomplete ? "—" : cashMoney(revenue - expense)}
+                />
+                <Kpi
+                  label="%"
+                  value={
+                    incomplete
+                      ? "—"
+                      : `${(revenue ? ((revenue - expense) / revenue) * 100 : 0).toFixed(1)}%`
+                  }
+                />
+              </div>
+              <details className="profitability-help muted">
+                <summary>Cómo se calcula</summary>
+                <p>
+                  Una fila por venta. Gastos totales = compra + gastos del
+                  embarque, proporcionales a los KG vendidos. Utilidad = venta −
+                  gastos totales; margen = utilidad / venta.
+                </p>
+              </details>
+              {incomplete && (
+                <p role="status">
+                  Hay ventas sin compra válida para calcular sus costos.
+                </p>
+              )}
+            </>
+          );
+        }}
+      />
       {current && (
         <ShipmentEditor
           key={current.id}
@@ -183,7 +233,7 @@ export default function Shipments() {
           onClose={() => setSelected(null)}
         />
       )}
-    </>
+    </section>
   );
 }
 function ShipmentEditor({
@@ -349,7 +399,10 @@ function ShipmentEditor({
                   aria-label={`Pago venta ${i + 1}`}
                   value={v.cash ? "cash" : "credit"}
                   onChange={(e) =>
-                    update(v.id, { cash: e.target.value === "cash" })
+                    update(v.id, {
+                      cash: e.target.value === "cash",
+                      paid: e.target.value === "cash" ? saleTotal(v) : 0,
+                    })
                   }
                 >
                   <option value="cash">Efectivo</option>
@@ -424,7 +477,8 @@ function ShipmentEditor({
           <button className="primary">Guardar cambios</button>
         </div>
         <p className="muted text-xs mt-3">
-          Los ajustes se reflejan en Caja, Inicio y KPIs al guardar.
+          Los ajustes se reflejan en Control de caja y en la rentabilidad al
+          guardar.
         </p>
       </form>
     </Modal>

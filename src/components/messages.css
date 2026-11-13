@@ -1,0 +1,648 @@
+.page-content:has(.crm-messages) {
+  padding: 16px 18px;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+}
+.crm-messages {
+  flex: 1;
+  min-height: 0;
+}
+.crm-messages .message-toolbar {
+  justify-content: space-between;
+  margin-bottom: 12px;
+  min-height: 40px;
+}
+.crm-messages .message-toolbar h1 {
+  font-size: 22px;
+}
+.crm-messages .message-toolbar p {
+  font-size: 11px;
+  margin-top: 3px;
+}
+.crm-messages .inbox {
+  height: calc(100dvh - 152px);
+  min-height: 420px;
+  grid-template-columns: 280px minmax(300px, 1fr) 260px;
+}
+.crm-messages .conversation {
+  min-height: 0;
+  overflow: hidden;
+}
+.crm-messages .bubbles {
+  min-height: 0;
+  gap: 14px;
+  overscroll-behavior: contain;
+}
+.crm-messages .chat-filters {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: white;
+  padding: 12px;
+  gap: 8px;
+}
+.crm-messages .chat-contact {
+  padding: 14px 10px;
+}
+.crm-messages .contact-panel {
+  padding: 18px 14px;
+}
+.crm-messages .contact-panel > .avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+}
+.crm-messages .bubble {
+  font-size: 13px;
+  max-width: 90%;
+}
+.crm-messages .bubble small {
+  letter-spacing: 0;
+}
+.crm-messages .chat-photo {
+  display: block;
+  margin-top: 10px;
+  color: #617564;
+  font-size: 10px;
+}
+.crm-messages .chat-photo img {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  border-radius: 8px;
+}
+.crm-messages .chat-photo span {
+  display: block;
+  margin-top: 4px;
+}
+.crm-deal-summary {
+  text-align: left;
+  background: #f0f6ed;
+  border: 1px solid #dce7d6;
+  border-radius: 9px;
+  padding: 12px;
+  margin-top: 18px;
+  font-size: 12px;
+}
+.crm-deal-summary > strong,
+.crm-messages .order-detected > strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #286a42;
+}
+.crm-deal-summary small {
+  display: block;
+  color: #637566;
+  font-size: 10px;
+  margin-top: 5px;
+}
+.crm-deal-summary p {
+  margin: 10px 0;
+}
+.crm-deal-summary dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 7px 0;
+}
+.crm-deal-summary dd {
+  font-weight: 600;
+  text-align: right;
+}
+.crm-next-step {
+  border-top: 1px solid #dce7d6;
+  padding-top: 10px;
+  line-height: 1.5;
+}
+.crm-agent-settings {
+  max-width: 960px;
+  margin: auto;
+}
+.crm-agent-settings > .text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.crm-agent-settings .card {
+  margin-bottom: 20px;
+  padding: 24px;
+}
+.crm-agent-settings .field {
+  margin-top: 20px;
+}
+.crm-agent-settings textarea {
+  width: 100%;
+  line-height: 1.6;
+  resize: vertical;
+}
+.crm-agent-settings p {
+  margin: 10px 0;
+  line-height: 1.7;
+}
+.crm-settings-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12px;
+  margin-top: 16px;
+}
+@media (min-width: 1600px) {
+  .crm-messages .inbox {
+    grid-template-columns: 320px minmax(300px, 1fr) 280px;
+  }
+}
+@media (max-width: 1250px) {
+  .crm-messages .inbox {
+    grid-template-columns: 250px minmax(280px, 1fr);
+  }
+  .crm-messages .contact-panel {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .page-content:has(.crm-messages) {
+    padding: 12px 8px;
+  }
+  .crm-messages .message-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .crm-messages .message-toolbar h1 {
+    font-size: 18px;
+  }
+  .crm-messages .message-toolbar > div:last-child {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .crm-messages .inbox {
+    display: block;
+    height: calc(100dvh - 208px);
+    min-height: 360px;
+  }
+  .crm-messages .conversation {
+    display: none;
+    height: 100%;
+  }
+  .crm-messages .show-conversation .conversation {
+    display: flex;
+  }
+  .crm-messages .show-conversation .chat-list {
+    display: none;
+  }
+  .crm-messages .back-chat {
+    display: block;
+  }
+  .crm-messages .bubbles {
+    padding: 12px;
+  }
+  .crm-messages .bubble {
+    max-width: 95%;
+  }
+  .crm-settings-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+@media (max-width: 700px) {
+  .crm-messages .message-toolbar > div:first-child {
+    padding-left: 40px;
+  }
+  .crm-agent-settings > .text-link {
+    margin-left: 32px;
+  }
+}
+
+/* CRM reminder flow and expandable contact details. */
+.crm-reminder-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  background: #edf5e9;
+  border: 1px solid #dce8d7;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+.crm-reminder-bar strong {
+  font-size: 13px;
+}
+.crm-reminder-bar p,
+.crm-reminder-bar > span {
+  font-size: 11px;
+  color: #617561;
+}
+.crm-reminder-bar > span {
+  flex: 1;
+  min-width: 180px;
+}
+.crm-messages .inbox {
+  grid-template-columns: 280px minmax(0, 1fr);
+  height: calc(100dvh - 228px);
+  position: relative;
+}
+.crm-messages .inbox.details-open {
+  grid-template-columns: 280px minmax(0, 1fr) 300px;
+}
+.crm-messages .contact-panel {
+  display: block;
+  overflow-y: auto;
+  background: white;
+}
+.crm-contact-heading {
+  text-align: left;
+  min-width: 0;
+}
+.crm-contact-heading > span:last-child {
+  display: flex;
+  align-items: center;
+  color: #617561;
+  font-size: 10px;
+  margin-top: 4px;
+}
+.crm-details-close {
+  margin-bottom: 18px;
+  width: 100%;
+  justify-content: center;
+}
+.crm-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  text-align: left;
+  padding: 8px 0;
+  flex-shrink: 0;
+  color: #52675b;
+}
+.conversation > header > .crm-switch {
+  margin-left: auto;
+}
+.switch-track {
+  display: inline-block;
+  width: 36px;
+  height: 21px;
+  background: #c9d0ca;
+  border-radius: 20px;
+  padding: 3px;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.switch-track::after {
+  content: "";
+  display: block;
+  width: 15px;
+  height: 15px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px #0002;
+  transition: transform 0.15s;
+}
+.crm-switch[aria-checked="true"] .switch-track {
+  background: #399e49;
+}
+.crm-switch[aria-checked="true"] .switch-track::after {
+  transform: translateX(15px);
+}
+.crm-switch:focus-visible {
+  outline: 2px solid #328444;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.reminder-message-label {
+  display: block;
+  color: #56774d;
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+.crm-simulation-status {
+  font-size: 12px;
+  color: #54714a;
+  padding: 10px;
+}
+.crm-settings-tabs {
+  margin-bottom: 20px;
+  width: fit-content;
+}
+.crm-settings-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.crm-settings-hint {
+  background: #f2f6ee;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 12px;
+  color: #54714a;
+}
+.crm-automation-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.crm-send-days {
+  margin: 24px 0 0;
+  border: 0;
+  padding: 0;
+  font-size: 13px;
+}
+.crm-send-days > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+.crm-send-days label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.crm-send-days input {
+  width: 16px;
+  height: 16px;
+  accent-color: #399e49;
+}
+.crm-message-preview {
+  padding: 18px;
+  background: #e8f3df;
+  border-radius: 10px;
+  margin-top: 20px;
+  white-space: pre-wrap;
+}
+.crm-message-preview strong,
+.crm-message-preview small {
+  font-size: 12px;
+}
+@media (max-width: 1250px) {
+  .crm-messages .inbox,
+  .crm-messages .inbox.details-open {
+    grid-template-columns: 250px minmax(0, 1fr);
+  }
+  .crm-messages .contact-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: min(360px, 100%);
+    z-index: 4;
+    box-shadow: -12px 0 32px #173e2526;
+    border-left: 1px solid #dae5d4;
+  }
+}
+@media (max-width: 700px) {
+  .crm-reminder-bar {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .crm-reminder-bar > div {
+    flex: 1;
+  }
+  .crm-reminder-bar > span {
+    flex-basis: 100%;
+    font-size: 10px;
+  }
+  .crm-reminder-bar .primary {
+    font-size: 11px;
+    padding: 9px;
+  }
+  .crm-messages .inbox {
+    height: calc(100dvh - 325px);
+    min-height: 360px;
+  }
+  .crm-messages .conversation > header {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px;
+  }
+  .conversation > header > .crm-switch {
+    flex-basis: 100%;
+    justify-content: flex-end;
+    padding: 0;
+    font-size: 11px;
+  }
+  .crm-automation-fields {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .crm-agent-settings .card {
+    padding: 16px;
+  }
+  .crm-settings-tabs {
+    width: 100%;
+  }
+}
+.crm-demo-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.crm-step-number {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 19px;
+  height: 19px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 11px;
+}
+.crm-two-step {
+  gap: 10px 20px;
+}
+.crm-two-step > div:first-child {
+  flex: 1 1 240px;
+}
+.crm-batch-progress {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+  font-size: 11px;
+  color: #52724a;
+}
+.crm-batch-progress progress {
+  margin-left: auto;
+  width: 150px;
+  height: 6px;
+  accent-color: #399e49;
+}
+.crm-batch-filter {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+}
+.crm-batch-filter button {
+  border-radius: 5px;
+  padding: 6px 8px;
+}
+.crm-batch-filter button.active {
+  background: #e6f2df;
+  color: #286a42;
+}
+.crm-batch-filter b {
+  border-radius: 4px;
+  padding: 2px 5px;
+  background: white;
+}
+.crm-history-toggle {
+  font-size: 11px;
+  align-self: center;
+}
+.crm-switch:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.batch-arrival {
+  animation: crm-arrival 0.3s ease-out;
+}
+@keyframes crm-arrival {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .batch-arrival {
+    animation: none;
+  }
+}
+.crm-schedule-settings {
+  max-width: 1500px;
+}
+.crm-schedule-heading {
+  margin: 24px 0 12px;
+}
+.crm-schedule-heading h3 {
+  font-weight: 600;
+}
+.crm-schedule-heading p {
+  font-size: 12px;
+  color: #657569;
+}
+.crm-schedule-matrix .table-scroll {
+  max-height: 560px;
+  overflow: auto;
+  border: 1px solid #dbe3d7;
+  border-radius: 8px;
+}
+.crm-schedule-matrix table {
+  min-width: 1120px;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.crm-schedule-matrix th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #173f30;
+  color: white;
+  border-right: 1px solid #ffffff24;
+}
+.crm-schedule-matrix .column-controls button {
+  color: inherit;
+}
+.crm-schedule-matrix td {
+  padding: 0;
+  border-right: 1px solid #e2e8dd;
+  border-bottom: 1px solid #e2e8dd;
+}
+.crm-schedule-matrix td:first-child {
+  position: sticky;
+  left: 0;
+  background: #f4f7f1;
+  z-index: 1;
+  padding: 8px 12px;
+  min-width: 180px;
+  font-size: 12px;
+}
+.crm-schedule-matrix th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+}
+.crm-schedule-matrix .column-filters th {
+  top: 40px;
+  background: #edf2e9;
+}
+.crm-schedule-matrix .column-filters input {
+  color: #18382a;
+}
+.crm-day-cell {
+  width: 100%;
+  min-width: 90px;
+  min-height: 36px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: #b8c2b4;
+}
+.crm-day-cell.marked {
+  color: #23643d;
+  background: #e6f2df;
+}
+.crm-day-cell:hover {
+  background: #d9e8d0;
+}
+.crm-contact-input {
+  width: 100%;
+  min-width: 200px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 12px;
+  padding: 8px 10px;
+}
+@media (max-width: 700px) {
+  .crm-demo-actions {
+    width: 100%;
+    gap: 8px;
+  }
+  .crm-demo-actions .primary,
+  .crm-demo-actions .secondary {
+    font-size: 11px;
+    padding: 8px;
+  }
+  .crm-two-step > div:first-child {
+    flex-basis: 100%;
+  }
+  .crm-batch-progress progress {
+    width: 60px;
+    flex-shrink: 0;
+  }
+  .crm-messages:has(.crm-two-step) .inbox {
+    height: calc(100dvh - 355px);
+  }
+  .crm-schedule-settings {
+    min-width: 0;
+    width: 100%;
+  }
+  .crm-schedule-matrix td:first-child {
+    min-width: 145px;
+    max-width: 145px;
+    white-space: normal;
+  }
+}
+@media (max-width: 700px) {
+  .crm-two-step > .crm-demo-actions,
+  .crm-two-step > .crm-batch-progress {
+    flex: 0 0 100%;
+  }
+  .crm-two-step .crm-demo-actions .text-link {
+    font-size: 11px;
+  }
+  .crm-two-step .crm-batch-progress span {
+    flex: 1;
+  }
+}

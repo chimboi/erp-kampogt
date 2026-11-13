@@ -18,7 +18,7 @@ const bullets = [
   },
   {
     icon: Truck,
-    title: "Rentabilidad por embarque",
+    title: "Rentabilidad por pedido",
     text: "Cada viaje con su compra, flete, gastos y resultado.",
   },
 ];

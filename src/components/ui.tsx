@@ -12,7 +12,16 @@ export function Card({
 }
 export function Badge({ children }: { children: ReactNode }) {
   return (
-    <span className={"badge " + (children === "Morada" ? "purple" : "")}>
+    <span
+      className={
+        "badge " +
+        (children === "Morada"
+          ? "purple"
+          : children === "Amarilla"
+            ? "yellow"
+            : "")
+      }
+    >
       {children}
     </span>
   );

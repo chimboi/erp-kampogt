@@ -1,4 +1,5 @@
 "use client";
+import { money, number } from "@/data";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -14,12 +15,30 @@ import {
   Cell,
   Legend,
 } from "recharts";
+export const chartColors = [
+  "#3fa34d",
+  "#7b3fa0",
+  "#0e3b2c",
+  "#e5a16e",
+  "#a8b7a3",
+  "#ddadbc",
+  "#4e96ad",
+  "#bc9b40",
+  "#62805a",
+  "#a86a76",
+];
 export function Trend({
   data,
   keys = ["Blanca", "Morada"],
+  dotEvery,
+  currency = false,
+  colors = ["#3fa34d", "#9363ad", "#d5a52b"],
 }: {
   data: Record<string, string | number>[];
   keys?: string[];
+  dotEvery?: number;
+  currency?: boolean;
+  colors?: string[];
 }) {
   return (
     <div className="chart">
@@ -37,12 +56,12 @@ export function Trend({
               >
                 <stop
                   offset="0%"
-                  stopColor={i ? "#9363ad" : "#3fa34d"}
+                  stopColor={colors[i % colors.length]}
                   stopOpacity={0.22}
                 />
                 <stop
                   offset="100%"
-                  stopColor={i ? "#9363ad" : "#3fa34d"}
+                  stopColor={colors[i % colors.length]}
                   stopOpacity={0}
                 />
               </linearGradient>
@@ -65,16 +84,37 @@ export function Trend({
             tick={{ fontSize: 11 }}
             tickFormatter={(v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : v)}
           />
-          <Tooltip formatter={(v) => Number(v).toLocaleString("es-MX")} />
+          <Tooltip
+            formatter={(v) => (currency ? money(Number(v)) : number(Number(v)))}
+          />
           <Legend />
           {keys.map((k, i) => (
             <Area
               key={k}
               type="monotone"
               dataKey={k}
-              stroke={i ? "#9363ad" : "#3fa34d"}
+              stroke={colors[i % colors.length]}
               fill={`url(#fill${i})`}
               strokeWidth={2.5}
+              dot={
+                dotEvery
+                  ? (props) => {
+                      const { cx, cy, index } = props;
+                      return (
+                        <circle
+                          key={index}
+                          cx={cx}
+                          cy={cy}
+                          r={index % dotEvery === 0 ? 3.5 : 0}
+                          fill={colors[i % colors.length]}
+                          stroke="white"
+                          strokeWidth={2}
+                        />
+                      );
+                    }
+                  : false
+              }
+              activeDot={{ r: 5 }}
             />
           ))}
         </AreaChart>
@@ -82,7 +122,13 @@ export function Trend({
     </div>
   );
 }
-export function Bars({ data }: { data: Record<string, string | number>[] }) {
+export function Bars({
+  data,
+  colors = ["#0e3b2c", "#a0cfa2"],
+}: {
+  data: Record<string, string | number>[];
+  colors?: string[];
+}) {
   return (
     <div className="chart">
       <ResponsiveContainer>
@@ -93,13 +139,13 @@ export function Bars({ data }: { data: Record<string, string | number>[] }) {
             tickFormatter={(v) => `${Math.round(v / 1000)}k`}
             tick={{ fontSize: 11 }}
           />
-          <Tooltip />
+          <Tooltip formatter={(value) => money(Number(value))} />
           <Legend />
-          <Bar dataKey="Costos" stackId="a" fill="#0e3b2c" />
+          <Bar dataKey="Costos" stackId="a" fill={colors[0]} />
           <Bar
             dataKey="Gastos"
             stackId="a"
-            fill="#a0cfa2"
+            fill={colors[1]}
             radius={[4, 4, 0, 0]}
           />
         </BarChart>
@@ -107,7 +153,15 @@ export function Bars({ data }: { data: Record<string, string | number>[] }) {
     </div>
   );
 }
-export function Donut({ data }: { data: { name: string; value: number }[] }) {
+export function Donut({
+  data,
+  currency = false,
+  showLegend = true,
+}: {
+  data: { name: string; value: number }[];
+  currency?: boolean;
+  showLegend?: boolean;
+}) {
   return (
     <div className="chart">
       <ResponsiveContainer>
@@ -120,24 +174,59 @@ export function Donut({ data }: { data: { name: string; value: number }[] }) {
             paddingAngle={4}
           >
             {data.map((d, i) => (
-              <Cell
-                key={d.name}
-                fill={
-                  [
-                    "#3fa34d",
-                    "#7b3fa0",
-                    "#0e3b2c",
-                    "#f6c9a8",
-                    "#a8b7a3",
-                    "#ddadbc",
-                  ][i % 6]
-                }
-              />
+              <Cell key={d.name} fill={chartColors[i % chartColors.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(v) => Number(v).toLocaleString("es-MX")} />
-          <Legend />
+          <Tooltip
+            formatter={(v) => (currency ? money(Number(v)) : number(Number(v)))}
+          />
+          {showLegend && <Legend />}
         </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function ClientBars({
+  data,
+  currency,
+}: {
+  data: { name: string; value: number }[];
+  currency: boolean;
+}) {
+  return (
+    <div className="chart">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} layout="vertical" margin={{ right: 20 }}>
+          <CartesianGrid horizontal={false} stroke="#e8ede8" />
+          <XAxis
+            type="number"
+            tickFormatter={(v) =>
+              `${currency ? "$" : ""}${v >= 1000 ? `${Math.round(v / 1000)}k` : v}`
+            }
+            tick={{ fontSize: 11 }}
+          />
+          <YAxis
+            type="category"
+            dataKey="name"
+            width={115}
+            tick={{ fontSize: 11 }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <Tooltip
+            formatter={(v) =>
+              currency ? money(Number(v)) : `${number(Number(v))} kg`
+            }
+          />
+          <Bar
+            dataKey="value"
+            name={currency ? "Ventas" : "Kilos"}
+            fill="#3fa34d"
+            radius={[0, 5, 5, 0]}
+            maxBarSize={24}
+          />
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );

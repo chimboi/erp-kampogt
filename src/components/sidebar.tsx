@@ -6,42 +6,45 @@ import { useState } from "react";
 import {
   LayoutDashboard,
   MessageCircle,
-  Megaphone,
+  Settings2,
+  Store,
   Truck,
-  Wallet,
   Users,
   Handshake,
   ChartNoAxesCombined,
   ChartPie,
-  Package,
+  Wallet,
   LogOut,
   Menu,
   ChevronLeft,
 } from "lucide-react";
 const groups = [
-  { label: "GENERAL", items: [["/inicio", "Inicio", LayoutDashboard]] },
+  {
+    label: "GENERAL",
+    items: [["/inicio", "Control de caja", LayoutDashboard]],
+  },
   {
     label: "CRM",
     items: [
       ["/crm/mensajes", "Mensajes", MessageCircle],
-      ["/crm/campanas", "Campañas", Megaphone],
+      ["/crm/mercado", "Mercado", Store],
+      ["/crm/configuracion", "Configuración", Settings2],
     ],
   },
   {
     label: "ERP",
     items: [
-      ["/erp/embarques", "Rentabilidad embarques", Truck],
-      ["/erp/caja", "Control de caja", Wallet],
+      ["/erp/pedidos", "Rentabilidad pedidos", Truck],
       ["/erp/saldo-clientes", "Saldo clientes", Users],
       ["/erp/saldo-proveedores", "Saldo proveedores", Handshake],
     ],
   },
   {
-    label: "INDICADORES",
+    label: "REPORTES",
     items: [
-      ["/kpis/ventas", "Ventas", ChartNoAxesCombined],
-      ["/kpis/financieros", "Financieros", ChartPie],
-      ["/kpis/embarques", "Embarques por cliente", Package],
+      ["/reportes/resultados", "Edo Resultados", ChartPie],
+      ["/reportes/flujo-efectivo", "Flujo de efectivo", Wallet],
+      ["/reportes/ingresos", "Análisis de ingresos", ChartNoAxesCombined],
     ],
   },
 ] as const;
@@ -94,7 +97,6 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                 >
                   <Icon size={19} />
                   <span>{label}</span>
-                  {href === "/crm/mensajes" && <b>14</b>}
                 </Link>
               ))}
             </div>
@@ -123,16 +125,6 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
       <div className="workspace">
-        <header className="topbar">
-          <span>
-            Operación <span className="muted">/ Kampo GT</span>
-          </span>
-          <div>
-            <span className="demo-dot" /> DEMO{" "}
-            <span className="top-date">10 noviembre, 2026</span>
-            <span className="avatar small">JG</span>
-          </div>
-        </header>
         <main className="page-content">{children}</main>
         <footer>
           Productos del Kampo GT{" "}
