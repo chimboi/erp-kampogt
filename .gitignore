@@ -45,3 +45,6 @@ next-env.d.ts
 # Original workbooks contain private financial information.
 /context/
 /test-results/
+
+# Local reference screenshots may contain private operational data.
+/ai-images/

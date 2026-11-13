@@ -399,7 +399,10 @@ function ShipmentEditor({
                   aria-label={`Pago venta ${i + 1}`}
                   value={v.cash ? "cash" : "credit"}
                   onChange={(e) =>
-                    update(v.id, { cash: e.target.value === "cash" })
+                    update(v.id, {
+                      cash: e.target.value === "cash",
+                      paid: e.target.value === "cash" ? saleTotal(v) : 0,
+                    })
                   }
                 >
                   <option value="cash">Efectivo</option>

@@ -89,6 +89,34 @@ export function usePersistentState<T>(
   );
   return [value, setValue];
 }
+// Reset only the Messages demo, including the in-memory fallback used when storage is unavailable.
+export function resetMessagesDemoState() {
+  const matches = (key: string) =>
+    [
+      "kampo-agents-v1",
+      "kampo-contact-stages-v1",
+      "kampo-reminders-v1",
+      "kampo-reminder-batch-v2",
+    ].includes(key) ||
+    key.startsWith("kampo-chat-") ||
+    key.startsWith("kampo-created-");
+  const keys = new Set(memory.keys());
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) keys.add(key);
+    }
+  } catch {}
+  for (const key of keys) {
+    if (!matches(key)) continue;
+    memory.delete(key);
+    try {
+      localStorage.removeItem(key);
+    } catch {}
+  }
+  listeners.forEach((callback) => callback());
+}
+
 type Store = {
   cashEntries: CashEntry[];
   registerCollection: (entry: CashEntry) => boolean;

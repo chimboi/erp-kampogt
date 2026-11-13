@@ -6,7 +6,8 @@ import { useState } from "react";
 import {
   LayoutDashboard,
   MessageCircle,
-  Megaphone,
+  Settings2,
+  Store,
   Truck,
   Users,
   Handshake,
@@ -26,7 +27,8 @@ const groups = [
     label: "CRM",
     items: [
       ["/crm/mensajes", "Mensajes", MessageCircle],
-      ["/crm/campanas", "Campañas", Megaphone],
+      ["/crm/mercado", "Mercado", Store],
+      ["/crm/configuracion", "Configuración", Settings2],
     ],
   },
   {
