@@ -1,4 +1,4 @@
-import Indicators from "@/components/kpis";
+import { redirect } from "next/navigation";
 export default function Page() {
-  return <Indicators view="ventas" />;
+  redirect("/reportes/ingresos");
 }

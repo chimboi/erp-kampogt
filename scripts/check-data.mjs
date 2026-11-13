@@ -404,3 +404,203 @@ assert.equal(nov.final, 500);
 console.log(
   "PASS: ventas y saldos demo $180k–$320k, migración preserva ediciones, cobros históricos sin duplicar caja.",
 );
+
+// Profitability must allocate costs across sales without charging the full purchase twice.
+{
+  const shipment = {
+    ...shipments[0],
+    kg: 100,
+    purchaseTotal: 500,
+    freight: 100,
+    unloading: 0,
+    scale: 0,
+    scale2: 0,
+    scale3: 0,
+    handling: 0,
+  };
+  const sale = { ...sales[0], kg: 25, price: 10 };
+  const result = exports.saleProfitability(sale, shipment);
+  assert.deepEqual(result, {
+    revenue: 250,
+    purchasePrice: 5,
+    expense: 150,
+    profit: 100,
+    margin: 40,
+  });
+  assert.equal(
+    exports.saleProfitability({ ...sale, date: "2027-01-01" }, shipment)
+      .expense,
+    150,
+  );
+  assert.equal(
+    exports.saleProfitability({ ...sale, kg: 75 }, shipment).expense +
+      result.expense,
+    exports.cost(shipment),
+  );
+  assert.equal(exports.saleProfitability(sale).profit, null);
+  assert.equal(
+    exports.saleProfitability(sale, { ...shipment, kg: 0 }).margin,
+    null,
+  );
+  assert.equal(
+    exports.saleProfitability({ ...sale, price: 4 }, shipment).profit,
+    -50,
+  );
+  assert.equal(
+    exports.saleProfitability({ ...sale, price: 0 }, shipment).margin,
+    0,
+  );
+}
+
+// Report totals reconcile across views and do not count supplier payments as costs twice.
+{
+  const reportFile = new URL("../src/data/reports.ts", import.meta.url);
+  const reportJS = ts.transpileModule(readFileSync(reportFile, "utf8"), {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2020,
+      esModuleInterop: true,
+    },
+  }).outputText;
+  const reports = {};
+  new Function("require", "exports", reportJS)(
+    (name) =>
+      name === "./index"
+        ? exports
+        : name === "./cash"
+          ? cashExports
+          : createRequire(reportFile)(name),
+    reports,
+  );
+  const shipment = {
+    ...shipments[0],
+    id: "report-purchase",
+    date: "2026-10-01",
+    kg: 100,
+    purchaseTotal: 500,
+    freight: 100,
+    unloading: 0,
+    scale: 0,
+    scale2: 0,
+    scale3: 0,
+    handling: 0,
+  };
+  const sale = {
+    ...sales[0],
+    shipment: shipment.id,
+    date: "2026-11-10",
+    kg: 25,
+    price: 10,
+    cash: false,
+    paid: 0,
+  };
+  const entry = {
+    id: "report-expense",
+    date: "2026-11-10",
+    time: "12:00",
+    kind: "Gasto",
+    category: "Nómina",
+    contact: "Equipo",
+    description: "Prueba",
+    amount: 20,
+  };
+  const input = {
+    sales: [sale],
+    shipments: [shipment],
+    cashEntries: [
+      entry,
+      {
+        ...entry,
+        id: "settlement",
+        category: "Pago a proveedores",
+        amount: 600,
+      },
+      { ...entry, id: "pallet", category: "Tarimas", amount: 10 },
+    ],
+  };
+  const range = { start: "2026-11-01", end: "2026-11-30" };
+  const result = reports.incomeStatement(input, range);
+  assert.equal(result.revenue, 250);
+  assert.equal(result.cost, 160);
+  assert.equal(result.expense, 20);
+  assert.equal(result.gross, 90);
+  assert.equal(result.operating, 70);
+  assert.equal(result.net, 70);
+  for (const [key, total] of [
+    ["income", result.revenue],
+    ["costs", result.cost],
+    ["expenses", result.expense],
+  ])
+    assert.equal(
+      result[key].reduce((sum, row) => sum + row.value, 0),
+      total,
+    );
+  assert.equal(
+    reports.incomeStatement({ ...input, shipments: [] }, range).missingCosts,
+    1,
+  );
+  assert.equal(
+    reports.incomeStatement(input, { start: "2027-01-01", end: "2027-01-31" })
+      .net,
+    0,
+  );
+  assert.deepEqual(
+    reports.previousPeriod({ start: "2024-03-01", end: "2024-03-31" }, "Mes"),
+    { start: "2024-02-01", end: "2024-02-29" },
+  );
+  assert.deepEqual(
+    reports.previousPeriod({ start: "2026-11-10", end: "2026-11-12" }, "Rango"),
+    { start: "2026-11-07", end: "2026-11-09" },
+  );
+  const flow = cashSummary(
+    cashRows(input.sales, input.cashEntries, input.shipments),
+    range,
+    { date: "2026-01-01", amount: 1000 },
+  );
+  assert.equal(flow.income, 0); // A credit sale earns revenue but has no cash receipt.
+  assert.equal(flow.expenses, 630);
+  assert.equal(flow.final, 370);
+  assert.equal(flow.initial + flow.net, flow.final);
+  const indirect = reports.indirectCashFlow(input, range);
+  assert.equal(indirect.profit, result.net);
+  assert.equal(indirect.collections, -250);
+  assert.equal(indirect.payments, -450);
+  assert.equal(indirect.operation, -700);
+  assert.equal(indirect.period, -630);
+  assert.equal(indirect.initial + indirect.period, indirect.final);
+  const cashSaleInput = {
+    ...input,
+    sales: [{ ...sale, paid: 250, cash: true }],
+  };
+  const cashSaleFlow = reports.indirectCashFlow(cashSaleInput, range);
+  assert.equal(cashSaleFlow.profit, indirect.profit);
+  assert.equal(cashSaleFlow.collections, 0);
+  assert.equal(cashSaleFlow.period, -380);
+  for (const period of [
+    range,
+    { start: "2026-10-01", end: "2026-11-30" },
+    { start: "2026-11-11", end: "2026-11-12" },
+  ]) {
+    const reconciled = reports.indirectCashFlow(input, period);
+    const direct = cashSummary(
+      cashRows(input.sales, input.cashEntries, input.shipments),
+      period,
+    );
+    assert.equal(reconciled.period, direct.net);
+    assert.equal(reconciled.final, direct.final);
+    assert.equal(
+      reconciled.profit +
+        reconciled.operation +
+        reconciled.investment +
+        reconciled.capital,
+      reconciled.period,
+    );
+  }
+  assert.equal(
+    reports.indirectCashFlow({ ...input, shipments: [] }, range).complete,
+    false,
+  );
+  console.log(
+    "PASS: reportes, costos proporcionales, pagos sin duplicados, comparativos y efectivo sin crédito.",
+  );
+}

@@ -16,12 +16,14 @@ export function DataTable<T>({
   rowId,
   initialSort,
   pageSize = 40,
+  renderSummary,
 }: {
   rows: T[];
   columns: Column<T>[];
   rowId: (row: T) => string;
   initialSort?: { id: string; direction: "asc" | "desc" };
   pageSize?: number;
+  renderSummary?: (rows: T[]) => ReactNode;
 }) {
   const [sort, setSort] = useState(initialSort);
   const [filters, setFilters] = useState<Record<string, string>>({});
@@ -61,6 +63,7 @@ export function DataTable<T>({
   );
   return (
     <>
+      {renderSummary?.(filtered)}
       <div className="table-scroll spreadsheet-table">
         <table>
           <thead>

@@ -2328,3 +2328,392 @@ button:disabled {
   width: 100%;
   margin-top: 8px;
 }
+
+/* Compact profitability report; keep numeric values fully visible. */
+.profitability-page .profitability-kpis {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0 10px;
+}
+.profitability-kpis .card {
+  padding: 12px 10px;
+}
+.profitability-kpis .kpi-label {
+  font-size: 9px;
+  letter-spacing: 0.4px;
+  gap: 4px;
+}
+.profitability-kpis .kpi-label svg {
+  display: none;
+}
+.profitability-kpis .kpi-value {
+  font-size: clamp(14px, 1.65vw, 22px);
+  letter-spacing: -0.6px;
+  margin-top: 6px;
+  white-space: nowrap;
+}
+.profitability-help {
+  font-size: 11px;
+  margin-bottom: 10px;
+}
+.profitability-help summary {
+  cursor: pointer;
+}
+.profitability-help p {
+  margin-top: 6px;
+}
+.profitability-page .spreadsheet-table {
+  background: white;
+  border: 1px solid #e7ebe3;
+  border-radius: 7px;
+}
+.profitability-page table {
+  table-layout: fixed;
+  min-width: 850px;
+  font-size: 11px;
+}
+.profitability-page .spreadsheet-table th,
+.profitability-page .spreadsheet-table td {
+  padding: 8px 4px;
+}
+.profitability-page .spreadsheet-table th {
+  font-size: 8px;
+  letter-spacing: 0;
+  white-space: normal;
+}
+.profitability-page .column-controls {
+  gap: 1px;
+  align-items: center;
+}
+.profitability-page .column-controls button {
+  gap: 1px;
+  min-width: 0;
+  text-align: left;
+}
+.profitability-page .column-controls svg {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+}
+.profitability-page .column-controls button:last-child {
+  padding: 3px 0;
+  flex-shrink: 0;
+}
+.profitability-page .column-filters input {
+  min-width: 0;
+  padding: 4px 2px;
+}
+.profitability-page th:nth-child(1) {
+  width: 7%;
+}
+.profitability-page th:nth-child(2) {
+  width: 6%;
+}
+.profitability-page th:nth-child(3) {
+  width: 6%;
+}
+.profitability-page th:nth-child(4) {
+  width: 11%;
+}
+.profitability-page th:nth-child(5) {
+  width: 6%;
+}
+.profitability-page th:nth-child(6) {
+  width: 10%;
+}
+.profitability-page th:nth-child(7) {
+  width: 5%;
+}
+.profitability-page th:nth-child(8),
+.profitability-page th:nth-child(9) {
+  width: 7%;
+}
+.profitability-page th:nth-child(10),
+.profitability-page th:nth-child(11),
+.profitability-page th:nth-child(12) {
+  width: 9%;
+}
+.profitability-page th:nth-child(13) {
+  width: 8%;
+}
+.profitability-page td:nth-child(-n + 6) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profitability-page td .text-link {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: inherit;
+}
+@media (max-width: 600px) {
+  .profitability-page .profitability-kpis {
+    grid-template-columns: repeat(5, minmax(112px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+}
+
+/* Financial reports */
+.financial-report .report-heading {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.financial-report .segmented button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.report-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin: 22px 0;
+}
+.report-cards .card {
+  margin: 0;
+}
+.report-metric {
+  position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+  padding: 23px;
+}
+.report-metric::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--report-color);
+}
+.financial-report .blue {
+  --report-color: #2455dc;
+}
+.financial-report .amber {
+  --report-color: #df8300;
+}
+.financial-report .rose {
+  --report-color: #ed2757;
+}
+.financial-report .green {
+  --report-color: #009d74;
+}
+.financial-report .teal {
+  --report-color: #079d96;
+  background: #e8faf5;
+}
+.report-metric p {
+  font-size: 12px;
+  color: #65746e;
+  margin-bottom: 12px;
+}
+.report-metric > strong {
+  color: var(--report-color);
+  font-size: clamp(22px, 2.5vw, 34px);
+  font-weight: 650;
+  letter-spacing: -0.7px;
+  font-variant-numeric: tabular-nums;
+}
+.report-metric-detail {
+  font-size: 11px;
+  margin-top: 15px;
+  color: #829189;
+}
+.report-metric-detail > span + span {
+  margin-left: 4px;
+}
+.report-charts .card {
+  border-radius: 15px;
+  margin-bottom: 0;
+}
+.report-charts .section-heading {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.report-charts .section-heading small {
+  font-size: 10px;
+}
+.report-charts .chart {
+  height: 270px;
+}
+.report-breakdowns {
+  align-items: start;
+}
+.report-breakdown {
+  border-radius: 15px;
+}
+.report-breakdown h2 {
+  margin-bottom: 24px;
+}
+.report-breakdown-row {
+  margin-bottom: 22px;
+}
+.report-breakdown-row:last-child {
+  margin-bottom: 0;
+}
+.report-breakdown-row > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+.report-breakdown-row strong {
+  font-weight: 500;
+  white-space: nowrap;
+}
+.report-breakdown-row > div + div {
+  margin-top: 10px;
+}
+.report-breakdown-row small {
+  color: #829189;
+  width: 42px;
+  text-align: right;
+}
+.report-breakdown-row progress {
+  width: 100%;
+  height: 7px;
+  border: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  accent-color: var(--report-color);
+}
+.report-breakdown-row progress::-webkit-progress-bar {
+  background: #eef2f6;
+  border-radius: 8px;
+}
+.report-breakdown-row progress::-webkit-progress-value {
+  background: var(--report-color);
+  border-radius: 8px;
+}
+.report-breakdown-row progress::-moz-progress-bar {
+  background: var(--report-color);
+}
+.report-table {
+  padding: 0;
+  margin-top: 22px;
+  overflow: hidden;
+  border-radius: 14px;
+}
+.report-table th:first-child {
+  width: 55%;
+}
+.report-table td {
+  padding: 12px 16px;
+}
+.report-table th:not(:first-child),
+.report-table td:not(:first-child) {
+  text-align: right;
+}
+.report-table th:not(:first-child) .column-controls {
+  justify-content: flex-end;
+}
+.report-group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 600;
+}
+.report-group svg {
+  color: #2455dc;
+}
+.report-total {
+  font-weight: 700;
+}
+.report-child {
+  padding-left: 24px;
+  color: #738379;
+}
+.report-table tr:has(.report-total) {
+  background: #f1f7f4;
+}
+.report-table .order-pagination {
+  padding: 12px 16px;
+}
+.report-note {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #7c8981;
+  margin: 16px 0;
+}
+.flow-cards {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+.flow-cards .report-metric {
+  padding: 17px 12px;
+}
+.flow-cards .report-metric > strong {
+  font-size: clamp(16px, 1.7vw, 25px);
+}
+.financial-report .dark {
+  background: #122b23;
+  --report-color: #fff;
+}
+.financial-report .dark p {
+  color: #a4e2d1;
+}
+@media (max-width: 1100px) {
+  .flow-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .report-cards {
+    grid-template-columns: 1fr;
+  }
+  .flow-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .report-charts .chart {
+    height: 220px;
+  }
+}
+
+.financial-report .flow-cards {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.flow-concept {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.flow-concept svg {
+  color: #8ca1b4;
+  flex-shrink: 0;
+}
+.flow-main {
+  padding-left: 24px;
+  font-weight: 600;
+}
+.flow-concept.report-child {
+  padding-left: 42px;
+}
+.report-table tr:has(.flow-initial) {
+  background: #f7f9fb;
+}
+.report-table tr:has(.flow-period) {
+  background: #eff4f8;
+  border-top: 1px solid #dce5eb;
+}
+.report-table tr:has(.flow-final) {
+  background: #effbf6;
+  border-top: 1px solid #dce5eb;
+}
+.flow-final svg {
+  color: #009d74;
+}
+@media (max-width: 1100px) {
+  .financial-report .flow-cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .financial-report .flow-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

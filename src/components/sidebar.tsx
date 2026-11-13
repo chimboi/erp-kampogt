@@ -12,7 +12,7 @@ import {
   Handshake,
   ChartNoAxesCombined,
   ChartPie,
-  Package,
+  Wallet,
   LogOut,
   Menu,
   ChevronLeft,
@@ -32,17 +32,17 @@ const groups = [
   {
     label: "ERP",
     items: [
-      ["/erp/embarques", "Rentabilidad embarques", Truck],
+      ["/erp/pedidos", "Rentabilidad pedidos", Truck],
       ["/erp/saldo-clientes", "Saldo clientes", Users],
       ["/erp/saldo-proveedores", "Saldo proveedores", Handshake],
     ],
   },
   {
-    label: "INDICADORES",
+    label: "REPORTES",
     items: [
-      ["/kpis/ventas", "Ventas", ChartNoAxesCombined],
-      ["/kpis/financieros", "Financieros", ChartPie],
-      ["/kpis/embarques", "Embarques por cliente", Package],
+      ["/reportes/resultados", "Edo Resultados", ChartPie],
+      ["/reportes/flujo-efectivo", "Flujo de efectivo", Wallet],
+      ["/reportes/ingresos", "Análisis de ingresos", ChartNoAxesCombined],
     ],
   },
 ] as const;

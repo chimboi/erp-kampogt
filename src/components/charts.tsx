@@ -32,11 +32,13 @@ export function Trend({
   keys = ["Blanca", "Morada"],
   dotEvery,
   currency = false,
+  colors = ["#3fa34d", "#9363ad", "#d5a52b"],
 }: {
   data: Record<string, string | number>[];
   keys?: string[];
   dotEvery?: number;
   currency?: boolean;
+  colors?: string[];
 }) {
   return (
     <div className="chart">
@@ -54,12 +56,12 @@ export function Trend({
               >
                 <stop
                   offset="0%"
-                  stopColor={["#3fa34d", "#9363ad", "#d5a52b"][i % 3]}
+                  stopColor={colors[i % colors.length]}
                   stopOpacity={0.22}
                 />
                 <stop
                   offset="100%"
-                  stopColor={["#3fa34d", "#9363ad", "#d5a52b"][i % 3]}
+                  stopColor={colors[i % colors.length]}
                   stopOpacity={0}
                 />
               </linearGradient>
@@ -91,7 +93,7 @@ export function Trend({
               key={k}
               type="monotone"
               dataKey={k}
-              stroke={["#3fa34d", "#9363ad", "#d5a52b"][i % 3]}
+              stroke={colors[i % colors.length]}
               fill={`url(#fill${i})`}
               strokeWidth={2.5}
               dot={
@@ -104,7 +106,7 @@ export function Trend({
                           cx={cx}
                           cy={cy}
                           r={index % dotEvery === 0 ? 3.5 : 0}
-                          fill={["#3fa34d", "#9363ad", "#d5a52b"][i % 3]}
+                          fill={colors[i % colors.length]}
                           stroke="white"
                           strokeWidth={2}
                         />
@@ -120,7 +122,13 @@ export function Trend({
     </div>
   );
 }
-export function Bars({ data }: { data: Record<string, string | number>[] }) {
+export function Bars({
+  data,
+  colors = ["#0e3b2c", "#a0cfa2"],
+}: {
+  data: Record<string, string | number>[];
+  colors?: string[];
+}) {
   return (
     <div className="chart">
       <ResponsiveContainer>
@@ -131,13 +139,13 @@ export function Bars({ data }: { data: Record<string, string | number>[] }) {
             tickFormatter={(v) => `${Math.round(v / 1000)}k`}
             tick={{ fontSize: 11 }}
           />
-          <Tooltip />
+          <Tooltip formatter={(value) => money(Number(value))} />
           <Legend />
-          <Bar dataKey="Costos" stackId="a" fill="#0e3b2c" />
+          <Bar dataKey="Costos" stackId="a" fill={colors[0]} />
           <Bar
             dataKey="Gastos"
             stackId="a"
-            fill="#a0cfa2"
+            fill={colors[1]}
             radius={[4, 4, 0, 0]}
           />
         </BarChart>

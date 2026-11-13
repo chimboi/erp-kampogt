@@ -1,1 +1,5 @@
-export { Cash as default } from "@/components/erp";
+import { redirect } from "next/navigation";
+
+export default function Page() {
+  redirect("/erp/pedidos");
+}

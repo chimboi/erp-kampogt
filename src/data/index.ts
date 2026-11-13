@@ -447,3 +447,27 @@ export function purchaseLabels(rows: Shipment[]): Map<string, string> {
     }),
   );
 }
+
+// Allocate purchase and shipment expenses by sold weight, independent of report dates.
+export function saleProfitability(sale: Sale, shipment?: Shipment) {
+  const revenue = saleTotal(sale);
+  if (!shipment || shipment.kg <= 0)
+    return {
+      revenue,
+      purchasePrice: null,
+      expense: null,
+      profit: null,
+      margin: null,
+    };
+  const purchasePrice = purchaseCost(shipment) / shipment.kg;
+  const expense =
+    Math.round(((cost(shipment) * sale.kg) / shipment.kg) * 100) / 100;
+  const profit = Math.round((revenue - expense) * 100) / 100;
+  return {
+    revenue,
+    purchasePrice,
+    expense,
+    profit,
+    margin: revenue ? (profit / revenue) * 100 : 0,
+  };
+}
